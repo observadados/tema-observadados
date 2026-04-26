@@ -1,0 +1,491 @@
+.dataset-header-metadata {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	list-style: none;
+	padding: 0;
+	margin: .5rem 0 1rem;
+
+	li {
+		color: $theme-secondary;
+		font-size: .875rem;
+
+		a {
+			font-weight: 300;
+			color: $theme-secondary;
+			text-decoration: none;
+			text-transform: none;
+			border-radius: .25rem;
+
+			&:hover,
+			&:focus {
+				color: $theme-primary;
+			}
+		}
+	}
+}
+
+.dataset-metadata {
+	margin-top: 1rem;
+
+	@media (min-width:$break-screen) {
+		width: 340px;
+		margin: 0;
+	}
+
+	h4 {
+		font-size:1rem;
+		margin: 0;
+	}
+
+	p {
+		margin-bottom: .5rem;
+		word-break: break-word;
+
+		a {
+			word-break: break-all;
+		}
+	}
+}
+
+// Estilos para o painel de arquivos (similar à referência)
+.dataset-visualization {
+	h3 {
+		font-size: 1.25rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.dataset-file-item {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: flex-start;
+		border: 1px solid rgba($theme-primary, 0.1);
+		border-radius: 8px;
+		padding: 1.5rem;
+		margin-bottom: 1rem;
+		background: #fff;
+		transition: all 0.2s ease;
+
+		@media (min-width: $break-screen) {
+			flex-direction: row;
+			align-items: center;
+		}
+
+		&:hover {
+			border-color: rgba($theme-primary, 0.3);
+			box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+		}
+
+		.file-info {
+			flex: 1;
+			margin-bottom: 1rem;
+
+			@media (min-width: $break-screen) {
+				margin-bottom: 0;
+				padding-right: 2rem;
+			}
+
+			h5 {
+				font-size: 1.1rem;
+				font-weight: 600;
+				margin: 0 0 0.5rem 0;
+				color: $theme-primary;
+
+				.file-size {
+					font-weight: 400;
+					font-size: 0.85em;
+					color: #666;
+				}
+			}
+
+			.file-desc {
+				font-size: 0.9rem;
+				color: #444;
+				margin-bottom: 0.5rem;
+			}
+
+			.file-meta {
+				font-size: 0.8rem;
+				color: #888;
+				margin: 0;
+
+				strong {
+					color: $theme-secondary;
+					border: 1px solid rgba($theme-secondary, 0.3);
+					padding: 0.1rem 0.5rem;
+					border-radius: 4px;
+					background: rgba($theme-secondary, 0.05);
+				}
+			}
+		}
+
+		.file-action {
+			.btn {
+				padding: 0.5rem 1rem;
+				font-size: 0.9rem;
+			}
+		}
+	}
+}
+
+.entry-header {
+	.entry-header-text {
+		position: relative;
+		width: 100%;
+
+		.btn-download {
+			margin-bottom: 1rem;
+
+			@media (min-width: $break-screen) {
+				position: absolute;
+				top: 0;
+				right: 0;
+				margin-bottom: 0;
+			}
+		}
+	}
+}
+
+// Estilos para o Resumo
+.dataset-summary-list {
+	list-style: none;
+	padding: 0;
+	margin: 1rem 0;
+	border: 1px solid rgba($theme-primary, 0.1);
+	border-radius: 8px;
+	background: #fff;
+
+	> li {
+		padding: 1rem;
+		border-bottom: 1px solid rgba($theme-primary, 0.05);
+		color: #444;
+
+		&:last-child {
+			border-bottom: none;
+		}
+
+		i {
+			color: $theme-secondary;
+			margin-right: 0.5rem;
+			width: 16px;
+			text-align: center;
+		}
+	}
+
+	.dataset-summary-formats {
+		list-style: none;
+		padding-left: 2rem;
+		margin: 0.5rem 0 0 0;
+		font-size: 0.9rem;
+		color: #666;
+
+		li {
+			position: relative;
+			margin-bottom: 0.25rem;
+
+			&::before {
+				content: "-";
+				position: absolute;
+				left: -1rem;
+				color: #ccc;
+			}
+		}
+	}
+}
+
+// Estilos para a página de listagem e filtros de Datasets
+.dataset-filters-wrapper {
+	margin-bottom: 2rem;
+
+	.dataset-search-bar {
+		display: flex;
+		align-items: center;
+		background: #f4f5f7;
+		border-radius: 8px;
+		padding: 0.5rem;
+		margin-bottom: 1.5rem;
+		border: 1px solid #e0e0e0;
+
+		input[type="text"] {
+			flex: 1;
+			border: none;
+			background: transparent;
+			padding: 0.5rem 1rem;
+			font-size: 1rem;
+			color: #333;
+			outline: none;
+			box-shadow: none;
+
+			&::placeholder {
+				color: #888;
+			}
+		}
+
+		.btn-search {
+			background: transparent;
+			border: none;
+			color: #333;
+			padding: 0.5rem 1rem;
+			font-size: 1.2rem;
+			cursor: pointer;
+		}
+
+		.btn-toggle-filters {
+			background: #fff;
+			border: 1px solid #ddd;
+			color: #555;
+			padding: 0.5rem 1rem;
+			border-radius: 6px;
+			margin-left: 0.5rem;
+			cursor: pointer;
+			font-size: 0.9rem;
+			
+			i {
+				margin-right: 0.25rem;
+			}
+
+			&:hover {
+				background: #eee;
+			}
+		}
+	}
+
+	.dataset-advanced-filters {
+		background: #fff;
+		border-radius: 8px;
+		border: 1px solid #e0e0e0;
+		padding: 1.5rem;
+
+		.filter-group {
+			margin-bottom: 1.5rem;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+
+			h4 {
+				font-size: 1rem;
+				font-weight: 700;
+				margin-bottom: 0.75rem;
+				color: #222;
+			}
+
+			.filter-options {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5rem;
+
+				.filter-badge {
+					display: inline-block;
+					padding: 0.4rem 1rem;
+					background: #f0f0f0;
+					color: #555;
+					border-radius: 6px;
+					font-size: 0.9rem;
+					text-decoration: none;
+					transition: all 0.2s ease;
+
+					&:hover {
+						background: #e0e0e0;
+						color: #333;
+					}
+
+					&.active {
+						background: #2a3441;
+						color: #fff;
+					}
+				}
+			}
+		}
+	}
+}
+
+.dataset-list-container {
+	.dataset-count {
+		font-size: 1rem;
+		color: #444;
+		margin-bottom: 1.5rem;
+	}
+
+	.dataset-list {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.dataset-list-item {
+		display: flex;
+		flex-direction: column;
+		background: #fff;
+		border: 1px solid #eaeaea;
+		border-radius: 8px;
+		padding: 1.5rem;
+		transition: box-shadow 0.2s ease;
+
+		@media (min-width: $break-screen) {
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: flex-start;
+		}
+
+		&:hover {
+			box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+		}
+
+		.dataset-item-main {
+			flex: 1;
+
+			.dataset-item-cats {
+				margin-bottom: 0.5rem;
+
+				.badge {
+					display: inline-block;
+					background: #f0f0f0;
+					color: #555;
+					padding: 0.25rem 0.75rem;
+					border-radius: 4px;
+					font-size: 0.8rem;
+					margin-right: 0.5rem;
+				}
+			}
+
+			.dataset-item-title {
+				font-size: 1.3rem;
+				font-weight: 700;
+				margin: 0 0 0.5rem 0;
+
+				a {
+					color: #222;
+					text-decoration: none;
+
+					&:hover {
+						color: $theme-primary;
+					}
+				}
+			}
+
+			.dataset-item-desc {
+				font-size: 1rem;
+				color: #555;
+				margin-bottom: 1rem;
+				line-height: 1.5;
+			}
+
+			.dataset-item-meta {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 1rem;
+				list-style: none;
+				padding: 0;
+				margin: 0 0 1rem 0;
+				font-size: 0.85rem;
+				color: #888;
+
+				li {
+					display: flex;
+					align-items: center;
+
+					i {
+						margin-right: 0.35rem;
+					}
+				}
+			}
+
+			.dataset-item-tags {
+				margin-bottom: 1rem;
+
+				.badge {
+					display: inline-block;
+					background: #f4f5f7;
+					color: #666;
+					padding: 0.25rem 0.75rem;
+					border-radius: 12px;
+					font-size: 0.8rem;
+					margin-right: 0.5rem;
+
+					i {
+						margin-right: 0.25rem;
+					}
+				}
+			}
+
+			.dataset-item-origin {
+				font-size: 0.85rem;
+				color: #555;
+				margin: 0;
+			}
+		}
+
+		.dataset-item-actions {
+			display: flex;
+			flex-direction: column;
+			gap: 0.75rem;
+			margin-top: 1.5rem;
+			min-width: 150px;
+
+			@media (min-width: $break-screen) {
+				margin-top: 0;
+				margin-left: 2rem;
+				align-items: stretch;
+			}
+
+			.btn {
+				text-align: center;
+				padding: 0.6rem 1rem;
+				border-radius: 6px;
+				font-size: 0.95rem;
+				font-weight: 500;
+				transition: all 0.2s ease;
+				text-decoration: none;
+
+				&.btn-primary {
+					background: #2a3441;
+					color: #fff;
+					border: none;
+
+					&:hover {
+						background: lighten(#2a3441, 10%);
+					}
+				}
+
+				&.btn-outline {
+					background: transparent;
+					color: #2a3441;
+					border: 1px solid #2a3441;
+
+					&:hover {
+						background: #f4f5f7;
+					}
+				}
+			}
+		}
+	}
+
+	.dataset-pagination {
+		margin-top: 2rem;
+		display: flex;
+		justify-content: center;
+		gap: 0.5rem;
+
+		.page-numbers {
+			display: inline-block;
+			padding: 0.5rem 1rem;
+			background: #fff;
+			border: 1px solid #ddd;
+			color: #333;
+			border-radius: 4px;
+			text-decoration: none;
+
+			&.current {
+				background: $theme-primary;
+				color: #fff;
+				border-color: $theme-primary;
+			}
+
+			&:hover:not(.current) {
+				background: #f4f5f7;
+			}
+		}
+	}
+}

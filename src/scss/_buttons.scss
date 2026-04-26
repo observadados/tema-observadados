@@ -1,0 +1,47 @@
+// BUTTONS
+.btn {
+	background: $theme-primary;
+	border: 1px solid $theme-primary;
+	border-radius: 8px;
+	color: white;
+	display: inline-block;
+	font-size: .875rem;
+	font-weight: normal;
+	padding: .5em 1.125em;
+	position: relative;
+	text-decoration: none !important;
+	text-transform: normal;
+	white-space: nowrap;
+	z-index: 100;
+
+	&:focus,
+	&:hover {
+		background: rgba($theme-secondary, .4);
+		border-color: rgba($theme-secondary, .4);
+		color: $theme-primary;
+	}
+
+	&.btn-outline {
+		background: transparent;
+		border-color: $theme-primary;
+		color: $theme-primary;
+
+		&:focus,
+		&:hover {
+			background: $theme-primary;
+			border-color: $theme-primary;
+			color: white;
+		}
+	}
+
+	&.btn-sm {
+		font-size: .825rem;
+		padding: .25em .75em;
+	}
+
+	&.btn-xs {
+		font-size: .75rem;
+		padding: .25em .75em;
+		margin-top: 5px;
+	}
+}

@@ -1,0 +1,10 @@
+@mixin placeholder {
+	::-webkit-input-placeholder {@content}
+	:-moz-placeholder           {@content}
+	::-moz-placeholder          {@content}
+	:-ms-input-placeholder      {@content}
+}
+
+@mixin shadow($x:0, $y:0, $size:8px, $color:rgba(black, .2)) {
+	box-shadow: $x $y $size $color;
+}
