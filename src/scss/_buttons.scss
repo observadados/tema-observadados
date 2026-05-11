@@ -10,9 +10,14 @@
 	padding: .5em 1.125em;
 	position: relative;
 	text-decoration: none !important;
-	text-transform: normal;
+	text-transform: none;
 	white-space: nowrap;
 	z-index: 100;
+	transition: .3s all ease-in-out;
+	letter-spacing: 0;
+	line-height: 1.25;
+	outline: none !important;
+	text-align: center;
 
 	&:focus,
 	&:hover {
@@ -31,6 +36,19 @@
 			background: $theme-primary;
 			border-color: $theme-primary;
 			color: white;
+		}
+	}
+
+	&.btn-outline-gray {
+		background: transparent;
+		border-color: $medium-gray;
+		color: $medium-gray;
+
+		&:focus,
+		&:hover {
+			background: transparent;
+			border-color: $dark-gray;
+			color: $dark-gray;
 		}
 	}
 

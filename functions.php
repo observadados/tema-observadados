@@ -512,7 +512,7 @@ function dados_func($atts)
 
 	$a = shortcode_atts(array(
 		'destaque' => false,
-		'posts_per_page' => 10
+		'posts_per_page' => get_option('posts_per_page')
 	), $atts);
 
 	$paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
@@ -771,8 +771,9 @@ function observadados_handle_downloads()
 
 				if ($has_files && file_exists($zip_path)) {
 					// Forçar download do arquivo ZIP
+					$post_slug = get_post_field('post_name', $post_id);
 					header('Content-Type: application/zip');
-					header('Content-Disposition: attachment; filename="conjunto-de-dados-' . $post_id . '.zip"');
+					header('Content-Disposition: attachment; filename="' . $post_slug . '.zip"');
 					header('Content-Length: ' . filesize($zip_path));
 					header('Cache-Control: no-cache, no-store, must-revalidate');
 					header('Pragma: no-cache');

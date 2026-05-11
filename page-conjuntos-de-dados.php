@@ -49,14 +49,14 @@ get_header(); ?>
 								value="<?php echo isset($_GET['busca']) ? esc_attr($_GET['busca']) : ''; ?>">
 
 							<?php if (!empty($_GET['busca'])): ?>
-								<a href="<?php echo esc_url(remove_query_arg('busca')); ?>" class="btn-clear-search"
-									style="padding: 0.5rem; color:#888;" title="Limpar busca"><i
+								<a href="<?php echo esc_url(remove_query_arg(array('busca', 'paged'))); ?>"
+									class="btn-clear-search" style="padding: 0.5rem; color:#888;" title="Limpar busca"><i
 										class="fa-solid fa-xmark"></i></a>
 							<?php endif; ?>
 
 							<button type="submit" class="btn-search"><i
 									class="fa-solid fa-magnifying-glass"></i></button>
-							<button type="button" class="btn-toggle-filters"
+							<button type="button" class="btn btn-outline-gray"
 								onclick="document.querySelector('.dataset-advanced-filters').style.display = document.querySelector('.dataset-advanced-filters').style.display === 'none' ? 'block' : 'none';"><i
 									class="fa-solid fa-filter"></i> Filtros</button>
 						</div>
@@ -68,8 +68,16 @@ get_header(); ?>
 								<h4>Categoria</h4>
 								<div class="filter-options">
 									<?php
+									$base_url = get_permalink();
+									$current_args = $_GET;
+									unset($current_args['paged']); // Remove paged se estiver na string
+									
 									$cat_atual = isset($_GET['categoria']) ? $_GET['categoria'] : '';
-									$url_sem_cat = remove_query_arg('categoria');
+
+									$args_sem_cat = $current_args;
+									unset($args_sem_cat['categoria']);
+									$url_sem_cat = empty($args_sem_cat) ? $base_url : add_query_arg($args_sem_cat, $base_url);
+
 									$class_active = empty($cat_atual) ? 'active' : '';
 									echo '<a href="' . esc_url($url_sem_cat) . '" class="filter-badge ' . $class_active . '">Todas</a>';
 
@@ -77,7 +85,9 @@ get_header(); ?>
 									if (!is_wp_error($categorias) && !empty($categorias)) {
 										foreach ($categorias as $cat) {
 											$class_active = ($cat_atual === $cat->slug) ? 'active' : '';
-											$url_cat = add_query_arg('categoria', $cat->slug);
+											$args_cat = $current_args;
+											$args_cat['categoria'] = $cat->slug;
+											$url_cat = add_query_arg($args_cat, $base_url);
 											echo '<a href="' . esc_url($url_cat) . '" class="filter-badge ' . $class_active . '">' . esc_html($cat->name) . '</a>';
 										}
 									}
@@ -91,7 +101,11 @@ get_header(); ?>
 								<div class="filter-options">
 									<?php
 									$formato_atual = isset($_GET['formato']) ? $_GET['formato'] : '';
-									$url_sem_formato = remove_query_arg('formato');
+
+									$args_sem_fmt = $current_args;
+									unset($args_sem_fmt['formato']);
+									$url_sem_formato = empty($args_sem_fmt) ? $base_url : add_query_arg($args_sem_fmt, $base_url);
+
 									$class_active = empty($formato_atual) ? 'active' : '';
 									echo '<a href="' . esc_url($url_sem_formato) . '" class="filter-badge ' . $class_active . '">Todos</a>';
 
@@ -99,7 +113,9 @@ get_header(); ?>
 									if (!is_wp_error($formatos) && !empty($formatos)) {
 										foreach ($formatos as $fmt) {
 											$class_active = ($formato_atual === $fmt->slug) ? 'active' : '';
-											$url_fmt = add_query_arg('formato', $fmt->slug);
+											$args_fmt = $current_args;
+											$args_fmt['formato'] = $fmt->slug;
+											$url_fmt = add_query_arg($args_fmt, $base_url);
 											echo '<a href="' . esc_url($url_fmt) . '" class="filter-badge ' . $class_active . '">' . esc_html(strtoupper($fmt->name)) . '</a>';
 										}
 									}
@@ -115,10 +131,8 @@ get_header(); ?>
 							?>
 
 							<?php if (isset($_GET['busca']) || isset($_GET['categoria']) || isset($_GET['formato'])): ?>
-								<div class="filter-actions"
-									style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #eee;">
-									<a href="<?php echo esc_url(get_permalink()); ?>" class="btn btn-outline-danger"
-										style="display:inline-block; color:#d9534f; border: 1px solid #d9534f; padding: .4rem 1rem; border-radius:6px; text-decoration:none; font-size:0.9rem;"><i
+								<div class="filter-actions">
+									<a href="<?php echo esc_url(get_permalink()); ?>" class="btn btn-outline-gray"><i
 											class="fa-solid fa-trash-can"></i> Limpar filtros</a>
 								</div>
 							<?php endif; ?>

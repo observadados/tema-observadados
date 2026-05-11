@@ -29,7 +29,8 @@
 	margin-top: 1rem;
 
 	@media (min-width:$break-screen) {
-		width: 340px;
+		min-width: 250px;
+		width: 250px;
 		margin: 0;
 	}
 
@@ -50,9 +51,12 @@
 
 // Estilos para o painel de arquivos (similar à referência)
 .dataset-visualization {
+	margin-top: 2rem;
+	width: 100%;
+	
 	h3 {
 		font-size: 1.25rem;
-		margin-bottom: 1.5rem;
+		margin-bottom: 0;
 	}
 
 	.dataset-file-item {
@@ -60,7 +64,6 @@
 		flex-direction: column;
 		justify-content: space-between;
 		align-items: flex-start;
-		border: 1px solid rgba($theme-primary, 0.1);
 		border-radius: 8px;
 		padding: 1.5rem;
 		margin-bottom: 1rem;
@@ -69,12 +72,7 @@
 
 		@media (min-width: $break-screen) {
 			flex-direction: row;
-			align-items: center;
-		}
-
-		&:hover {
-			border-color: rgba($theme-primary, 0.3);
-			box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+			align-items: flex-start;
 		}
 
 		.file-info {
@@ -91,6 +89,7 @@
 				font-weight: 600;
 				margin: 0 0 0.5rem 0;
 				color: $theme-primary;
+				word-break: break-all;
 
 				.file-size {
 					font-weight: 400;
@@ -118,12 +117,12 @@
 					background: rgba($theme-secondary, 0.05);
 				}
 			}
-		}
 
-		.file-action {
-			.btn {
-				padding: 0.5rem 1rem;
-				font-size: 0.9rem;
+			.file-action {
+				@media (min-width:$break-screen) {
+					display: flex;
+					gap: .5rem;
+				}
 			}
 		}
 	}
@@ -155,6 +154,11 @@
 	border: 1px solid rgba($theme-primary, 0.1);
 	border-radius: 8px;
 	background: #fff;
+
+	@media (min-width:$break-screen) {
+		min-width: 250px;
+		width: 250px;
+	}
 
 	> li {
 		padding: 1rem;
@@ -211,11 +215,12 @@
 			flex: 1;
 			border: none;
 			background: transparent;
-			padding: 0.5rem 1rem;
+			padding: 0.5rem .75rem;
 			font-size: 1rem;
 			color: #333;
 			outline: none;
 			box-shadow: none;
+			font-family: $font;
 
 			&::placeholder {
 				color: #888;
@@ -229,25 +234,6 @@
 			padding: 0.5rem 1rem;
 			font-size: 1.2rem;
 			cursor: pointer;
-		}
-
-		.btn-toggle-filters {
-			background: #fff;
-			border: 1px solid #ddd;
-			color: #555;
-			padding: 0.5rem 1rem;
-			border-radius: 6px;
-			margin-left: 0.5rem;
-			cursor: pointer;
-			font-size: 0.9rem;
-			
-			i {
-				margin-right: 0.25rem;
-			}
-
-			&:hover {
-				background: #eee;
-			}
 		}
 	}
 
@@ -422,42 +408,12 @@
 			flex-direction: column;
 			gap: 0.75rem;
 			margin-top: 1.5rem;
-			min-width: 150px;
+			min-width: 120px;
 
 			@media (min-width: $break-screen) {
 				margin-top: 0;
 				margin-left: 2rem;
 				align-items: stretch;
-			}
-
-			.btn {
-				text-align: center;
-				padding: 0.6rem 1rem;
-				border-radius: 6px;
-				font-size: 0.95rem;
-				font-weight: 500;
-				transition: all 0.2s ease;
-				text-decoration: none;
-
-				&.btn-primary {
-					background: #2a3441;
-					color: #fff;
-					border: none;
-
-					&:hover {
-						background: lighten(#2a3441, 10%);
-					}
-				}
-
-				&.btn-outline {
-					background: transparent;
-					color: #2a3441;
-					border: 1px solid #2a3441;
-
-					&:hover {
-						background: #f4f5f7;
-					}
-				}
 			}
 		}
 	}
