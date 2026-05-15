@@ -7,6 +7,7 @@
 @import "banner";
 @import "buttons";
 @import "dataset";
+@import "grid";
 
 body {
 	font-family: $font;
@@ -67,8 +68,15 @@ a.active {
 	margin-bottom: 0 !important;
 }
 
+.mb-4 {
+	margin-bottom: 2rem !important;
+}
+
 .mt-2 {
 	margin-top: 1.5rem !important;
+}
+.mt-4 {
+	margin-top: 2rem !important;
 }
 
 .mx-0 {
@@ -91,6 +99,38 @@ a.active {
 
 .rounded-box {
 	border-radius: .75rem;
+}
+
+
+.badge {
+	display: inline-block;
+	padding: .125rem .5rem;
+	border-radius: .25rem;
+	background: $light-gray;
+	color: $theme-primary;
+	font-weight: 300;
+	font-size: .75rem;
+	margin: 0 .75rem .75rem 0;
+	text-decoration: none !important;
+}
+a.badge:hover {
+	background: #e0e0e0;
+	color: #333;
+}
+
+a.badge.active {
+	background: #2a3441;
+	color: #fff;
+}
+
+.button-wrapper {
+	padding-top: 2rem;
+	margin-top: 2rem;
+	border-top: 1px solid rgba($theme-primary, .1);
+
+	.btn {
+		margin-bottom: 0;
+	}
 }
 
 
@@ -172,9 +212,8 @@ a.active {
 		}
 	}
 
-
 	.entry-content-boxed {
-		max-width: 900px;
+		max-width: 800px;
 		margin: 0 15px 40px;
 		color: $text-color;
 
@@ -217,7 +256,6 @@ a.active {
 					display: flex;
 					flex-direction: column;
 					gap: .5rem;
-					border-left: 1px solid $theme-primary;
 
 					li {
 
@@ -247,7 +285,7 @@ a.active {
 								display: block;
 								position: absolute;
 								top: 0;
-								left: -20px;
+								left: -15px;
 								width: 0;
 								height: 100%;
 								background: $theme-primary;
@@ -281,6 +319,26 @@ a.active {
 
 				@media (min-width:$break-screen) {
 					padding: 1.5rem 2rem;
+				}
+
+				&.no-background {
+					background: transparent;
+					padding: 0 !important;
+				}
+
+				&.additional-content {
+					margin-top: 2rem;
+
+					h3 {
+						font-weight: bold !important;
+						margin-bottom: .25rem;
+					}
+
+					p {
+						&:last-of-type {
+							margin-bottom: 0;
+						}
+					}
 				}
 			}
 
@@ -346,7 +404,7 @@ a.active {
 			hr {
 				display: block;
 				margin: 2rem auto;
-				border: 1px solid $theme-tertiary;
+				border: 1px solid $theme-secondary;
 				border-width: 2px 0 3px;
 				width: 100px;
 				height: 0;
@@ -416,6 +474,17 @@ a.active {
 			#local-e-data {
 				p {
 					line-height: 1.25;
+				}
+			}
+
+			.wp-block-quote {
+				margin-left: 2rem;
+				margin-top: 1rem;
+
+				p {
+					&:last-of-type {
+						margin-bottom: 0;
+					}
 				}
 			}
 
@@ -502,6 +571,41 @@ a.active {
 						}
 					}
 				}
+
+				&.lista-destaque {
+					list-style: none;
+					padding: 0;
+					margin: 0 0 1rem;
+					display: grid;
+					grid-template-columns: 1fr;
+					gap: 1rem;
+
+					@media (min-width: $break-screen) {
+						grid-template-columns: repeat(3, 1fr);
+					}
+
+					&>li {
+						background: rgba($theme-primary, 0.1);
+						border-radius: 0.5rem;
+						padding: 1rem;
+						margin: 0;
+						font-size: 1rem;
+						color: $theme-primary;
+						font-weight: 700;
+
+						ul {
+							list-style: none;
+							padding-left: 0;
+							margin: 0;
+
+							&>li {
+								margin-bottom: .25rem;
+								font-weight: normal;
+								font-size: .875rem;
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -530,6 +634,13 @@ a.active {
 	.entry-header {
 		margin: -80px 0 0;
 		padding: 80px 0 0;
+
+		&.narrow {
+			max-width: 800px;
+			margin-left: auto;
+			margin-right: auto;
+			margin-bottom: 1rem;
+		}
 
 		@media (min-width:$break-screen) {
 			margin-top: -120px;
@@ -570,7 +681,7 @@ a.active {
 		}
 
 		.entry-subtitle {
-			font-weight: 200;
+			font-weight: 300;
 			position: relative;
 			line-height: 1.25;
 			font-size: 1rem;
@@ -715,7 +826,7 @@ a.active {
 .general-tags {
 	display: flex;
 	flex-wrap: wrap;
-	gap: .5rem;	
+	gap: .5rem;
 	list-style: none;
 	padding: 0;
 	margin: 0 0 1rem;
@@ -744,7 +855,7 @@ a.active {
 			&:hover,
 			&:focus {
 				background: darken($light-gray, 5%);
-			}			
+			}
 		}
 	}
 }

@@ -506,6 +506,121 @@ function redes_func($atts)
 add_shortcode('redes', 'redes_func');
 
 
+// [equipe]
+function equipe_func($atts)
+{
+
+	$a = shortcode_atts(array(
+		'destaque' => false
+	), $atts);
+
+	$args = [
+		'post_type' => 'integrante',
+		'posts_per_page' => -1
+	];
+	$loop = new WP_Query($args);
+
+	$content = '<ul class="grid-container">';
+	if ($loop->have_posts()) {
+		while ($loop->have_posts()) {
+			$loop->the_post();
+
+			$nome = get_the_title();
+			$link = get_permalink();
+			$papel = get_field('papel');
+			$resumo = get_the_excerpt();
+
+			$foto = get_the_post_thumbnail(get_the_ID(), 'medium', ['class' => 'img-fluid']);
+			if (!$foto) {
+				$foto = '<div class="image-placeholder"></div>';
+			}
+
+			$lattes = get_field('lattes');
+			$github = get_field('github');
+			$x = get_field('x');
+			$instagram = get_field('instagram');
+			$linkedin = get_field('linkedin');
+
+			$social_html = '<ul class="grid-item-social">';
+			if ($lattes) {
+				$lattes_svg_path = get_template_directory() . '/img/lattes.svg';
+				$lattes_icon = file_exists($lattes_svg_path) ? file_get_contents($lattes_svg_path) : 'Lattes';
+				$social_html .= '<li><a href="' . esc_url($lattes) . '" target="_blank" title="Lattes">' . $lattes_icon . '</a></li>';
+			}
+			if ($github) {
+				$social_html .= '<li><a href="' . esc_url($github) . '" target="_blank" title="GitHub"><i class="fab fa-github"></i></a></li>';
+			}
+			if ($x) {
+				$social_html .= '<li><a href="' . esc_url($x) . '" target="_blank" title="X"><i class="fab fa-x-twitter"></i></a></li>';
+			}
+			if ($instagram) {
+				$social_html .= '<li><a href="' . esc_url($instagram) . '" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a></li>';
+			}
+			if ($linkedin) {
+				$social_html .= '<li><a href="' . esc_url($linkedin) . '" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a></li>';
+			}
+			$social_html .= '</ul>';
+
+			$content .= '<li class="grid-item">';
+			$content .= '<div class="grid-item-photo"><a href="' . esc_url($link) . '">' . $foto . '</a></div>';
+			$content .= '<div class="grid-item-info">';
+
+			$content .= '<h3 class="grid-item-title"><a href="' . esc_url($link) . '">' . esc_html($nome) . '</a></h3>';
+			if ($papel) {
+				$content .= '<span class="grid-item-role">' . esc_html($papel) . '</span>';
+			}
+			if ($resumo) {
+				$content .= '<div class="grid-item-desc">' . $resumo . '</div>';
+			}
+
+			$content .= $social_html;
+			$content .= '<a href="' . esc_url($link) . '" class="grid-item-link">Ler mais &rarr;</a>';
+
+			$content .= '</div>'; // .grid-item-info
+			$content .= '</li>'; // .grid-item
+		}
+	}
+	$content .= '</ul>';
+
+	wp_reset_query();
+
+	return $content;
+}
+add_shortcode('equipe', 'equipe_func');
+
+
+// [links]
+function links_func($atts)
+{
+
+	$a = shortcode_atts(array(
+		'destaque' => false
+	), $atts);
+
+	$args = [
+		'post_type' => 'link',
+		'posts_per_page' => -1
+	];
+	$loop = new WP_Query($args);
+
+	$count = $loop->post_count;
+
+	$content = '<ul class="links-list">';
+	if ($loop->have_posts()) {
+		while ($loop->have_posts()) {
+			$loop->the_post();
+			if (!((bool) $a['destaque']) || get_field('destaque'))
+				$content .= "<li><a href='" . get_field('url') . "' title=" . the_title() . " target=" . get_field('alvo') . ">" . get_field('icone') . "</a></li>";
+		}
+	}
+	$content .= '</ul>';
+
+	wp_reset_query();
+
+	return $content;
+}
+add_shortcode('links', 'links_func');
+
 // [dados]
 function dados_func($atts)
 {
@@ -583,7 +698,7 @@ function dados_func($atts)
 					}
 					if (isset($row['formato']) && is_a($row['formato'], 'WP_Term')) {
 						$link_filtro = home_url('/conjuntos-de-dados/?formato=' . $row['formato']->slug);
-						$formatos[$row['formato']->slug] = '<a href="' . esc_url($link_filtro) . '" style="text-decoration:none; color:inherit;">' . strtoupper($row['formato']->name) . '</a>';
+						$formatos[$row['formato']->slug] = '<a href="' . esc_url($link_filtro) . '">' . strtoupper($row['formato']->name) . '</a>';
 					}
 				}
 			}
@@ -598,7 +713,7 @@ function dados_func($atts)
 			if ($cats && !is_wp_error($cats)) {
 				foreach ($cats as $c) {
 					$link_filtro = home_url('/conjuntos-de-dados/?categoria=' . $c->slug);
-					$cats_html .= '<a href="' . esc_url($link_filtro) . '" class="badge badge-light" style="text-decoration:none;">' . esc_html($c->name) . '</a> ';
+					$cats_html .= '<a href="' . esc_url($link_filtro) . '" class="badge badge-light">' . esc_html($c->name) . '</a> ';
 				}
 			}
 
@@ -608,7 +723,7 @@ function dados_func($atts)
 			if ($tags && !is_wp_error($tags)) {
 				foreach ($tags as $t) {
 					$link_filtro = home_url('/conjuntos-de-dados/?tag=' . $t->slug);
-					$tags_html .= '<a href="' . esc_url($link_filtro) . '" class="badge badge-light" style="text-decoration:none;"><i class="fa-solid fa-tag"></i> ' . esc_html($t->name) . '</a> ';
+					$tags_html .= '<a href="' . esc_url($link_filtro) . '" class="badge badge-light"><i class="fa-solid fa-tag"></i> ' . esc_html($t->name) . '</a> ';
 				}
 			}
 
@@ -816,3 +931,178 @@ function observadados_handle_downloads()
 	}
 }
 add_action('template_redirect', 'observadados_handle_downloads');
+
+// [blog]
+function blog_func($atts)
+{
+
+	$a = shortcode_atts(array(
+		'posts_per_page' => get_option('posts_per_page')
+	), $atts);
+
+	$paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+
+	$args = [
+		'post_type' => 'post',
+		'posts_per_page' => $a['posts_per_page'],
+		'paged' => $paged,
+		'tax_query' => array('relation' => 'AND'),
+	];
+
+	// Filter Category
+	if (!empty($_GET['categoria'])) {
+		$args['tax_query'][] = array(
+			'taxonomy' => 'category',
+			'field' => 'slug',
+			'terms' => sanitize_text_field($_GET['categoria'])
+		);
+	}
+
+	// Filter Tag
+	if (!empty($_GET['tag'])) {
+		$args['tax_query'][] = array(
+			'taxonomy' => 'post_tag',
+			'field' => 'slug',
+			'terms' => sanitize_text_field($_GET['tag'])
+		);
+	}
+
+	// Remove empty tax_query
+	if (count($args['tax_query']) === 1) {
+		unset($args['tax_query']);
+	}
+
+	$loop = new WP_Query($args);
+
+	$content = '<div class="blog-list-container">';
+
+	// Exibe uma mensagem se houver filtro de tag ativo
+	if (!empty($_GET['tag'])) {
+		$content .= '<div class="filter-info mb-4">Exibindo posts com a tag: <strong>' . $_GET['tag'] . '</strong> (<a href="/blog">Remover o filtro</a>)</div>';
+	}
+
+	// Categories Filter
+	$base_url = get_permalink();
+	$current_args = $_GET;
+	unset($current_args['paged']);
+
+	$cat_atual = isset($_GET['categoria']) ? $_GET['categoria'] : '';
+
+	$content .= '<div class="filter-options mb-4">';
+
+	// "Todas"
+	$args_sem_cat = $current_args;
+	unset($args_sem_cat['categoria']);
+	$url_sem_cat = empty($args_sem_cat) ? $base_url : add_query_arg($args_sem_cat, $base_url);
+	$class_active = empty($cat_atual) ? 'active' : '';
+	$content .= '<a href="' . esc_url($url_sem_cat) . '" class="filter-badge ' . $class_active . '">Todas as categorias</a>';
+
+	$categorias = get_terms(array('taxonomy' => 'category', 'hide_empty' => true));
+	if (!is_wp_error($categorias) && !empty($categorias)) {
+		foreach ($categorias as $cat) {
+			$class_active = ($cat_atual === $cat->slug) ? 'active' : '';
+			$args_cat = $current_args;
+			$args_cat['categoria'] = $cat->slug;
+			$url_cat = add_query_arg($args_cat, $base_url);
+			$content .= '<a href="' . esc_url($url_cat) . '" class="filter-badge ' . $class_active . '">' . esc_html($cat->name) . '</a>';
+		}
+	}
+	$content .= '</div>';
+
+	// Grid
+	$content .= '<ul class="grid-container">';
+	if ($loop->have_posts()) {
+		while ($loop->have_posts()) {
+			$loop->the_post();
+
+			$title = get_the_title();
+			$link = get_permalink();
+			$resumo = get_the_excerpt();
+			$foto = get_the_post_thumbnail(get_the_ID(), 'medium_large', ['class' => 'img-fluid']);
+			if (!$foto) {
+				$foto = '<div class="image-placeholder"></div>';
+			}
+
+			// Categories badge
+			$cats = get_the_category();
+			$cat_name = '';
+			if (!empty($cats)) {
+				$cat_name = $cats[0]->name;
+			}
+
+			$author_name = get_the_author();
+			$date = get_the_date('d/m/Y');
+
+			$content .= '<li class="grid-item blog-post">';
+			$content .= '<div class="grid-item-photo"><a href="' . esc_url($link) . '">' . $foto . '</a></div>';
+			$content .= '<div class="grid-item-info">';
+
+			if ($cat_name) {
+				$content .= '<div><span class="badge badge-light">' . esc_html($cat_name) . '</span></div>';
+			}
+
+			$content .= '<h3 class="grid-item-title"><a href="' . esc_url($link) . '">' . esc_html($title) . '</a></h3>';
+
+			if ($resumo) {
+				$content .= '<div class="grid-item-desc">' . $resumo . '</div>';
+			} else {
+				$content .= '<div class="grid-item-desc"></div>';
+			}
+
+			$content .= '<ul class="post-meta">';
+			$content .= '<li><i class="fa-regular fa-user"></i> ' . esc_html($author_name) . '</li>';
+			$content .= '<li><i class="fa-regular fa-calendar"></i> ' . esc_html($date) . '</li>';
+			$content .= '</ul>';
+			$content .= '<a href="' . esc_url($link) . '" class="grid-item-link">Ler mais &rarr;</a>';
+
+			$content .= '</div>'; // .grid-item-info
+			$content .= '</li>'; // .grid-item
+		}
+	} else {
+		$content .= '<p>Nenhum post encontrado.</p>';
+	}
+	$content .= '</ul>';
+
+	// Pagination
+	$big = 999999999;
+	$pagination = paginate_links(array(
+		'base' => str_replace($big, '%#%', esc_url(get_pagenum_link($big))),
+		'format' => '?paged=%#%',
+		'current' => max(1, get_query_var('paged')),
+		'total' => $loop->max_num_pages,
+		'prev_text' => '&laquo; Anterior',
+		'next_text' => 'Próxima &raquo;',
+	));
+	if ($pagination) {
+		$content .= '<div class="dataset-pagination">' . $pagination . '</div>';
+	}
+
+	$content .= '</div>'; // .blog-list-container
+
+	wp_reset_query();
+
+	return $content;
+}
+add_shortcode('blog', 'blog_func');
+
+/**
+ * Redireciona páginas de categoria padrão do WordPress para a página de Blog com filtro.
+ */
+function observadados_redirect_category_to_blog()
+{
+	if (is_category()) {
+		$category = get_queried_object();
+		if ($category && isset($category->slug)) {
+			$redirect_url = home_url('/blog/?categoria=' . $category->slug);
+
+			$paged = get_query_var('paged');
+			if ($paged > 1) {
+				$redirect_url = add_query_arg('paged', $paged, $redirect_url);
+			}
+
+			wp_redirect($redirect_url, 301);
+			exit;
+		}
+	}
+}
+add_action('template_redirect', 'observadados_redirect_category_to_blog');

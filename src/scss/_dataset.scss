@@ -256,33 +256,33 @@
 				margin-bottom: 0.75rem;
 				color: #222;
 			}
+		}
+	}
+}
 
-			.filter-options {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 0.5rem;
+.filter-options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
 
-				.filter-badge {
-					display: inline-block;
-					padding: 0.4rem 1rem;
-					background: #f0f0f0;
-					color: #555;
-					border-radius: 6px;
-					font-size: 0.9rem;
-					text-decoration: none;
-					transition: all 0.2s ease;
+	.filter-badge {
+		display: inline-block;
+		padding: 0.4rem 1rem;
+		background: #f0f0f0;
+		color: #555;
+		border-radius: 6px;
+		font-size: 0.9rem;
+		text-decoration: none;
+		transition: all 0.2s ease;
 
-					&:hover {
-						background: #e0e0e0;
-						color: #333;
-					}
+		&:hover {
+			background: #e0e0e0;
+			color: #333;
+		}
 
-					&.active {
-						background: #2a3441;
-						color: #fff;
-					}
-				}
-			}
+		&.active {
+			background: #2a3441;
+			color: #fff;
 		}
 	}
 }
@@ -358,26 +358,6 @@
 				line-height: 1.5;
 			}
 
-			.dataset-item-meta {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 1rem;
-				list-style: none;
-				padding: 0;
-				margin: 0 0 1rem 0;
-				font-size: 0.85rem;
-				color: #888;
-
-				li {
-					display: flex;
-					align-items: center;
-
-					i {
-						margin-right: 0.35rem;
-					}
-				}
-			}
-
 			.dataset-item-tags {
 				margin-bottom: 1rem;
 
@@ -442,6 +422,30 @@
 			&:hover:not(.current) {
 				background: #f4f5f7;
 			}
+		}
+	}
+}
+
+.dataset-item-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	list-style: none;
+	padding: 0;
+	margin: 0 0 1rem 0;
+	font-size: 0.85rem;
+	color: $theme-secondary;
+
+	a {
+		color: $theme-secondary;
+	}
+
+	li {
+		display: flex;
+		align-items: center;
+
+		i {
+			margin-right: 0.35rem;
 		}
 	}
 }

@@ -26,7 +26,8 @@
 
 			<?php if (get_field('paginas_relacionadas')): ?>
 				<div class="page-row">
-					<div class="entry-content entry-content-box">
+					<div
+						class="entry-content entry-content-box <?php if (get_field('fundo_transparente')): ?>no-background<?php endif; ?>">
 						<?php
 						the_content();
 						?>
@@ -43,9 +44,16 @@
 					</nav>
 				</div>
 			<?php else: ?>
-				<div class="entry-content entry-content-box">
+				<div
+					class="entry-content entry-content-box <?php if (get_field('fundo_transparente')): ?>no-background<?php endif; ?>">
 					<?php the_content(); ?>
 				</div><!-- .entry-content -->
+			<?php endif; ?>
+
+			<?php if (get_field('conteudo_adicional')): ?>
+				<div class="entry-content entry-content-box additional-content">
+					<?php echo get_field('conteudo_adicional'); ?>
+				</div>
 			<?php endif; ?>
 		</div><!-- .entry-content-boxed -->
 	<?php endif; ?>
