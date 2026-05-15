@@ -1165,11 +1165,13 @@
   border-radius: 4px;
   font-size: 0.8rem;
   margin-right: 0.5rem;
+  margin-bottom: 0;
 }
 .dataset-list-container .dataset-list-item .dataset-item-main .dataset-item-title {
   font-size: 1.3rem;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
+  line-height: 1.25;
 }
 .dataset-list-container .dataset-list-item .dataset-item-main .dataset-item-title a {
   color: #222;
@@ -1199,6 +1201,9 @@
 .dataset-list-container .dataset-list-item .dataset-item-main .dataset-item-tags .badge i {
   margin-right: 0.25rem;
 }
+.dataset-list-container .dataset-list-item .dataset-item-main .dataset-item-tags.mb-0 .badge {
+  margin-bottom: 0;
+}
 .dataset-list-container .dataset-list-item .dataset-item-main .dataset-item-origin {
   font-size: 0.85rem;
   color: #555;
@@ -1218,13 +1223,14 @@
     align-items: stretch;
   }
 }
-.dataset-list-container .dataset-pagination {
+
+.dataset-pagination {
   margin-top: 2rem;
   display: flex;
   justify-content: center;
   gap: 0.5rem;
 }
-.dataset-list-container .dataset-pagination .page-numbers {
+.dataset-pagination .page-numbers {
   display: inline-block;
   padding: 0.5rem 1rem;
   background: #fff;
@@ -1233,12 +1239,12 @@
   border-radius: 4px;
   text-decoration: none;
 }
-.dataset-list-container .dataset-pagination .page-numbers.current {
+.dataset-pagination .page-numbers.current {
   background: #1B263B;
   color: #fff;
   border-color: #1B263B;
 }
-.dataset-list-container .dataset-pagination .page-numbers:hover:not(.current) {
+.dataset-pagination .page-numbers:hover:not(.current) {
   background: #f4f5f7;
 }
 
@@ -1258,9 +1264,29 @@
 .dataset-item-meta li {
   display: flex;
   align-items: center;
+  gap: 0.125rem;
 }
 .dataset-item-meta li i {
   margin-right: 0.35rem;
+}
+
+.modal-citacao {
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 90%;
+  margin: auto;
+  z-index: 9999;
+}
+
+.publicacao-autores {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+.publicacao-autores a {
+  color: #8E9AAF;
 }
 
 .grid-container {
@@ -1337,33 +1363,6 @@
 .grid-container .grid-item .grid-item-info .grid-item-desc p {
   margin-bottom: 0;
 }
-.grid-container .grid-item .grid-item-info .grid-item-social {
-  list-style: none;
-  padding: 0 !important;
-  margin: 0;
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-}
-.grid-container .grid-item .grid-item-info .grid-item-social li {
-  margin: 0;
-}
-.grid-container .grid-item .grid-item-info .grid-item-social li a {
-  display: block;
-  color: #1B263B;
-  font-size: 1.25rem;
-  transition: all 0.2s ease;
-  line-height: 1;
-  box-shadow: none;
-}
-.grid-container .grid-item .grid-item-info .grid-item-social li a svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  fill: currentColor;
-}
-.grid-container .grid-item .grid-item-info .grid-item-social li a:hover, .grid-container .grid-item .grid-item-info .grid-item-social li a:focus {
-  color: #0097d1;
-}
 .grid-container .grid-item .grid-item-info .grid-item-link {
   font-weight: normal;
   text-decoration: none !important;
@@ -1374,6 +1373,37 @@
 }
 .grid-container .grid-item .grid-item-info .grid-item-link:hover, .grid-container .grid-item .grid-item-info .grid-item-link:focus {
   color: #1B263B;
+}
+
+.grid-item-social {
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+.grid-item-social.center {
+  justify-content: center;
+}
+.grid-item-social li {
+  margin: 0;
+}
+.grid-item-social li a {
+  display: block;
+  color: #1B263B;
+  font-size: 1.25rem;
+  transition: all 0.2s ease;
+  line-height: 1;
+  box-shadow: none;
+}
+.grid-item-social li a svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: currentColor;
+}
+.grid-item-social li a:hover, .grid-item-social li a:focus {
+  color: #0097d1;
 }
 
 .post-meta {
@@ -1409,6 +1439,89 @@
 .integrante-main-content {
   flex: 1;
   min-width: 0;
+}
+
+.links-grouped-container {
+  margin-top: 2rem;
+}
+
+.links-group {
+  margin-bottom: 3rem;
+}
+.links-group-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.links-group-icon {
+  background: #e2e8f0;
+  border-radius: 0.5rem;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #1B263B;
+  flex-shrink: 0;
+}
+.links-group-title {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1B263B;
+  font-weight: 800;
+}
+
+.links-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+@media (min-width: 768px) {
+  .links-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.link-card {
+  display: block;
+  text-decoration: none !important;
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.75rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02), 0 4px 12px rgba(0, 0, 0, 0.04);
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: 1px solid white;
+}
+.link-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  border-color: #EAEAEA;
+}
+.link-card:hover .link-card-icon {
+  color: #1B263B;
+}
+.link-card-title {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #1B263B;
+  font-weight: 800;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  line-height: 1.3;
+}
+.link-card-icon {
+  color: #8E9AAF;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  transition: color 0.2s;
+}
+.link-card-desc {
+  margin: 0.5rem 0 0;
+  color: #8E9AAF;
 }
 
 body {
@@ -1466,6 +1579,19 @@ a.active {
 
 .mb-0 {
   margin-bottom: 0 !important;
+}
+
+.mb-1 {
+  margin-bottom: 0.5rem !important;
+}
+
+.mb-2 {
+  margin-bottom: 1rem !important;
+}
+
+.my-2 {
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
 }
 
 .mb-4 {
@@ -1565,6 +1691,7 @@ a.badge.active {
 #page .post-thumbnail img {
   display: block;
   width: 100%;
+  border-radius: 0.75rem;
 }
 #page .col-8 .entry-content-boxed {
   margin-left: 0;
@@ -2092,7 +2219,7 @@ a.badge.active {
 
 .article-search {
   padding: 20px 0;
-  border-top: 1px solid #0097d1;
+  border-top: 1px solid rgba(142, 154, 175, 0.6);
 }
 .article-search:first-of-type {
   margin-top: 30px;

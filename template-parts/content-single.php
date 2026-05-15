@@ -44,7 +44,7 @@
 
 			<?php $tags = get_the_tags();
 			if ($tags) {
-				echo '<h4>Palavras-chave:</h4>';
+				echo '<h4 class="mb-0">Palavras-chave:</h4>';
 				foreach ($tags as $tag) {
 					echo '<a href="' . esc_url(home_url('/blog/?tag=' . $tag->slug)) . '" class="badge badge-light"><i class="fa-solid fa-tag"></i> ' . esc_html($tag->name) . '</a>';
 				}

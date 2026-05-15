@@ -590,32 +590,73 @@ add_shortcode('equipe', 'equipe_func');
 
 
 // [links]
-function links_func($atts)
+function links_func()
 {
+	$terms = get_terms(array(
+		'taxonomy' => 'categoria_link',
+		'hide_empty' => true,
+		'orderby' => 'term_order',
+		'order' => 'ASC',
+	));
 
-	$a = shortcode_atts(array(
-		'destaque' => false
-	), $atts);
+	$content = '<div class="links-grouped-container">';
 
-	$args = [
-		'post_type' => 'link',
-		'posts_per_page' => -1
-	];
-	$loop = new WP_Query($args);
+	if (!is_wp_error($terms) && !empty($terms)) {
+		foreach ($terms as $term) {
+			// ACF recupera dados de taxonomia usando o padrão 'taxonomy_termId'
+			$icone = get_field('icone', 'categoria_link_' . $term->term_id);
 
-	$count = $loop->post_count;
+			if (!$icone)
+				$icone = '<i class="fa-solid fa-link"></i>'; // Ícone padrão caso esteja vazio
 
-	$content = '<ul class="links-list">';
-	if ($loop->have_posts()) {
-		while ($loop->have_posts()) {
-			$loop->the_post();
-			if (!((bool) $a['destaque']) || get_field('destaque'))
-				$content .= "<li><a href='" . get_field('url') . "' title=" . the_title() . " target=" . get_field('alvo') . ">" . get_field('icone') . "</a></li>";
+			$content .= '<div class="links-group">';
+
+			// Header da categoria com Ícone e Título
+			$content .= '<div class="links-group-header">';
+			$content .= '<div class="links-group-icon">' . $icone . '</div>';
+			$content .= '<h3 class="links-group-title">' . esc_html($term->name) . '</h3>';
+			$content .= '</div>';
+
+			// Query dos links específicos desta categoria
+			$args = [
+				'post_type' => 'link_util',
+				'posts_per_page' => -1,
+				'tax_query' => array(
+					array(
+						'taxonomy' => 'categoria_link',
+						'field' => 'term_id',
+						'terms' => $term->term_id,
+					)
+				)
+			];
+			$loop = new WP_Query($args);
+
+			if ($loop->have_posts()) {
+				$content .= '<div class="links-grid">';
+				while ($loop->have_posts()) {
+					$loop->the_post();
+					$link = get_field('link');
+					$title = get_the_title();
+					$resumo = get_the_excerpt();
+
+					$content .= '<a href="' . esc_url($link) . '" target="_blank" class="link-card">';
+					$content .= '<h4 class="link-card-title">' . esc_html($title) . '<i class="fa-solid fa-arrow-up-right-from-square link-card-icon"></i></h4>';
+					if ($resumo) {
+						$content .= '<div class="link-card-desc">' . wp_kses_post($resumo) . '</div>';
+					}
+					$content .= '</a>';
+				}
+				$content .= '</div>';
+			}
+			wp_reset_postdata();
+
+			$content .= '</div>'; // .links-group
 		}
+	} else {
+		$content .= '<p>Nenhum link encontrado.</p>';
 	}
-	$content .= '</ul>';
 
-	wp_reset_query();
+	$content .= '</div>'; // .links-grouped-container
 
 	return $content;
 }
@@ -794,6 +835,333 @@ function dados_func($atts)
 	return $content;
 }
 add_shortcode('dados', 'dados_func');
+
+
+// [publicacoes]
+function publicacoes_func($atts)
+{
+
+	$a = shortcode_atts(array(
+		'destaque' => false,
+		'posts_per_page' => get_option('posts_per_page')
+	), $atts);
+
+	$paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+
+	$args = [
+		'post_type' => 'publicacao',
+		'posts_per_page' => $a['posts_per_page'],
+		'paged' => $paged,
+		'tax_query' => array('relation' => 'AND'),
+		'meta_query' => array('relation' => 'AND'),
+	];
+
+	// Search Textual Inteligente (Título + Conteúdo + Autores + Tags)
+	if (!empty($_GET['busca'])) {
+		$busca = sanitize_text_field($_GET['busca']);
+
+		// 1. Busca Padrão (Título e Conteúdo)
+		$search_posts = get_posts(array(
+			'post_type' => 'publicacao',
+			'posts_per_page' => -1,
+			's' => $busca,
+			'fields' => 'ids'
+		));
+
+		// 2. Busca por Autores
+		$autores_matches = get_posts(array(
+			'post_type' => 'autor',
+			'posts_per_page' => -1,
+			's' => $busca,
+			'fields' => 'ids'
+		));
+
+		$autores_publicacoes = array();
+		if (!empty($autores_matches)) {
+			$meta_query_autores = array('relation' => 'OR');
+			foreach ($autores_matches as $a_id) {
+				$meta_query_autores[] = array('key' => 'autoria', 'value' => $a_id, 'compare' => '=');
+				$meta_query_autores[] = array('key' => 'autoria', 'value' => '"' . $a_id . '"', 'compare' => 'LIKE');
+				$meta_query_autores[] = array('key' => 'autor', 'value' => $a_id, 'compare' => '=');
+				$meta_query_autores[] = array('key' => 'autor', 'value' => '"' . $a_id . '"', 'compare' => 'LIKE');
+			}
+			$autores_publicacoes = get_posts(array(
+				'post_type' => 'publicacao',
+				'posts_per_page' => -1,
+				'meta_query' => $meta_query_autores,
+				'fields' => 'ids'
+			));
+		}
+
+		// 3. Busca por Tags
+		$tags_matches = get_terms(array(
+			'taxonomy' => 'post_tag',
+			'search' => $busca,
+			'fields' => 'ids',
+			'hide_empty' => false
+		));
+
+		$tags_publicacoes = array();
+		if (!empty($tags_matches) && !is_wp_error($tags_matches)) {
+			$tags_publicacoes = get_posts(array(
+				'post_type' => 'publicacao',
+				'posts_per_page' => -1,
+				'tax_query' => array(
+					array(
+						'taxonomy' => 'post_tag',
+						'field' => 'term_id',
+						'terms' => $tags_matches
+					)
+				),
+				'fields' => 'ids'
+			));
+		}
+
+		// Junta todos os IDs encontrados
+		$matched_ids = array_unique(array_merge($search_posts, $autores_publicacoes, $tags_publicacoes));
+
+		if (!empty($matched_ids)) {
+			$args['post__in'] = $matched_ids;
+			$args['orderby'] = 'post__in'; // Mantém alguma relevância
+		} else {
+			$args['post__in'] = array(0); // Força nenhum resultado
+		}
+	}
+	// Filter Autoria (Post Type 'autor') - Usando SLUG
+	if (!empty($_GET['autor'])) {
+		$autor_slug = sanitize_text_field($_GET['autor']);
+		$autor_post = get_page_by_path($autor_slug, OBJECT, 'autor');
+
+		if ($autor_post) {
+			$autor_id = $autor_post->ID;
+			$args['meta_query'][] = array(
+				'relation' => 'OR',
+				array(
+					'key' => 'autoria', // Assumindo 'autoria' como nome do campo
+					'value' => $autor_id,
+					'compare' => '='
+				),
+				array(
+					'key' => 'autoria',
+					'value' => '"' . $autor_id . '"',
+					'compare' => 'LIKE'
+				),
+				array(
+					'key' => 'autor', // Assumindo 'autor' como nome alternativo do campo
+					'value' => $autor_id,
+					'compare' => '='
+				),
+				array(
+					'key' => 'autor',
+					'value' => '"' . $autor_id . '"',
+					'compare' => 'LIKE'
+				)
+			);
+		}
+	}
+
+	// Filter Categoria (Post Type 'categoria') - Usando SLUG
+	if (!empty($_GET['categoria'])) {
+		$cat_slug = sanitize_text_field($_GET['categoria']);
+		$cat_post = get_page_by_path($cat_slug, OBJECT, 'categoria');
+
+		if ($cat_post) {
+			$cat_id = $cat_post->ID;
+			$args['meta_query'][] = array(
+				'relation' => 'OR',
+				array(
+					'key' => 'categoria',
+					'value' => $cat_id,
+					'compare' => '='
+				),
+				array(
+					'key' => 'categoria',
+					'value' => '"' . $cat_id . '"',
+					'compare' => 'LIKE'
+				)
+			);
+		}
+	}
+
+	// Filter Tag
+	if (!empty($_GET['tag'])) {
+		$args['tax_query'][] = array(
+			'taxonomy' => 'post_tag',
+			'field' => 'slug',
+			'terms' => sanitize_text_field($_GET['tag'])
+		);
+	}
+
+	// Clean up empty queries
+	if (isset($args['tax_query']) && count($args['tax_query']) === 1)
+		unset($args['tax_query']);
+	if (isset($args['meta_query']) && count($args['meta_query']) === 1)
+		unset($args['meta_query']);
+
+	$loop = new WP_Query($args);
+
+	$content = '<div class="dataset-list-container">';
+
+	// Mensagem informativa de filtros ativos (Autoria e Tag)
+	$mensagens_filtro = [];
+	if (!empty($_GET['autor']) && isset($autor_post) && $autor_post) {
+		$mensagens_filtro[] = 'autoria: <strong>' . esc_html($autor_post->post_title) . '</strong>';
+	}
+	if (!empty($_GET['tag'])) {
+		$tag_term = get_term_by('slug', sanitize_text_field($_GET['tag']), 'post_tag');
+		if ($tag_term) {
+			$mensagens_filtro[] = 'palavra-chave: <strong>' . esc_html($tag_term->name) . '</strong>';
+		}
+	}
+	if (!empty($mensagens_filtro)) {
+		$content .= '<div class="filter-info mb-4">Exibindo publicações filtradas por ' . implode(' e ', $mensagens_filtro) . ' <a href="/publicacoes" class="btn btn-outline-gray btn-xs"><i class="fa-solid fa-xmark"></i> Remover</a></div>';
+	}
+
+	$content .= '<p class="dataset-count"><strong>' . $loop->found_posts . '</strong> publicações encontradas</p>';
+
+	if ($loop->have_posts()) {
+		$content .= '<div class="dataset-list">';
+		while ($loop->have_posts()) {
+			$loop->the_post();
+
+			// Categorias (Post Object)
+			$categorias_field = get_field('categoria');
+			$cats_html = '';
+			if ($categorias_field) {
+				if (!is_array($categorias_field)) {
+					$categorias_field = array($categorias_field);
+				}
+				foreach ($categorias_field as $c_id) {
+					$c_post = is_object($c_id) ? $c_id : get_post($c_id);
+					if ($c_post) {
+						$link_filtro = home_url('/publicacoes/?categoria=' . $c_post->post_name);
+						$cats_html .= '<a href="' . esc_url($link_filtro) . '" class="badge badge-light">' . esc_html(get_the_title($c_post->ID)) . '</a> ';
+					}
+				}
+			}
+
+			// Autoria (Post Object)
+			$autoria_field = get_field('autoria') ? get_field('autoria') : get_field('autor');
+			$autores_str = '-';
+			if ($autoria_field) {
+				if (!is_array($autoria_field)) {
+					$autoria_field = array($autoria_field);
+				}
+				$nomes_autores = array();
+				foreach ($autoria_field as $a_id) {
+					$a_post = is_object($a_id) ? $a_id : get_post($a_id);
+					if ($a_post) {
+						$link_filtro = home_url('/publicacoes/?autor=' . $a_post->post_name);
+						$nomes_autores[] = '<a href="' . esc_url($link_filtro) . '">' . esc_html(get_the_title($a_post->ID)) . '</a>';
+					}
+				}
+				if (!empty($nomes_autores)) {
+					$autores_str = implode(', ', $nomes_autores);
+				}
+			}
+
+			// Tags
+			$tags = get_the_terms(get_the_ID(), 'post_tag');
+			$tags_html = '';
+			if ($tags && !is_wp_error($tags)) {
+				foreach ($tags as $t) {
+					$link_filtro = home_url('/publicacoes/?tag=' . $t->slug);
+					$tags_html .= '<a href="' . esc_url($link_filtro) . '" class="badge badge-light"><i class="fa-solid fa-tag"></i> ' . esc_html($t->name) . '</a> ';
+				}
+			}
+
+			$content .= '<div class="dataset-list-item">';
+			$content .= '  <div class="dataset-item-main">';
+
+			if ($cats_html) {
+				$content .= '    <div class="dataset-item-cats">' . $cats_html . '</div>';
+			}
+
+			$content .= '    <h3 class="dataset-item-title"><a href="' . get_permalink() . '">' . get_the_title() . '</a></h3>';
+
+			if (get_field('objetivo')) {
+				$content .= '    <p class="dataset-item-desc">' . get_field('objetivo') . '</p>';
+			}
+
+			$content .= '    <ul class="dataset-item-meta">';
+			$content .= '      <li><i class="fa-regular fa-calendar"></i> ' . get_the_date('d/m/Y') . '</li>';
+			$content .= '      <li><i class="fa-solid fa-user"></i> Autoria: ' . $autores_str . '</li>';
+			$content .= '    </ul>';
+
+			if ($tags_html) {
+				$content .= '    <div class="dataset-item-tags mb-0">' . $tags_html . '</div>';
+			}
+
+			$content .= '  </div>'; // .dataset-item-main
+
+			$content .= '  <div class="dataset-item-actions">';
+
+			$arquivo = get_field('arquivo');
+			if ($arquivo) {
+				$url_arquivo = is_array($arquivo) ? $arquivo['url'] : $arquivo;
+				$content .= '    <a href="' . esc_url($url_arquivo) . '" class="btn btn-primary" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Download</a>';
+			}
+
+			$link_original = get_field('link');
+			if ($link_original) {
+				$content .= '    <a href="' . esc_url($link_original) . '" class="btn btn-primary" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Publicação original</a>';
+			}
+
+			$content .= '    <a href="' . get_permalink() . '" class="btn btn-outline"><i class="fa-solid fa-eye"></i> Detalhes</a>';
+
+			$citacao = get_field('citacao');
+			if ($citacao) {
+				$modal_id = 'modal-citacao-' . get_the_ID();
+				$content .= '    <button type="button" class="btn btn-outline" onclick="document.getElementById(\'' . $modal_id . '\').showModal()"><i class="fa-solid fa-quote-left"></i> Como citar</button>';
+
+				$content .= '    <dialog id="' . $modal_id . '" class="modal-citacao">';
+				$content .= '      <h3 class="mb-2">Como citar:</h3>';
+				$content .= '      <div>' . wp_kses_post($citacao) . '</div>';
+				$content .= '      <div><button type="button" class="btn btn-outline" onclick="document.getElementById(\'' . $modal_id . '\').close()">Fechar</button></div>';
+				$content .= '    </dialog>';
+
+				$content .= '    <script>
+					const dialog_' . str_replace('-', '_', $modal_id) . ' = document.getElementById("' . $modal_id . '");
+					dialog_' . str_replace('-', '_', $modal_id) . '.addEventListener("click", function(event) {
+						const rect = this.getBoundingClientRect();
+						const isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height && rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
+						if (!isInDialog) {
+							this.close();
+						}
+					});
+				</script>';
+			}
+
+			$content .= '  </div>'; // .dataset-item-actions
+
+			$content .= '</div>'; // .dataset-list-item
+		}
+		$content .= '</div>'; // .dataset-list
+
+		// Pagination
+		$big = 999999999;
+		$pagination = paginate_links(array(
+			'base' => str_replace($big, '%#%', esc_url(get_pagenum_link($big))),
+			'format' => '?paged=%#%',
+			'current' => max(1, get_query_var('paged')),
+			'total' => $loop->max_num_pages,
+			'prev_text' => '&laquo; Anterior',
+			'next_text' => 'Próxima &raquo;',
+		));
+		if ($pagination) {
+			$content .= '<div class="dataset-pagination">' . $pagination . '</div>';
+		}
+
+	} else {
+		$content .= '<p>Nenhuma publicação encontrada para os filtros selecionados.</p>';
+	}
+	$content .= '</div>'; // .dataset-list-container
+
+	wp_reset_query();
+
+	return $content;
+}
+add_shortcode('publicacoes', 'publicacoes_func');
 
 
 function hex_to_rgb($hex, $return_string = true)
@@ -978,7 +1346,7 @@ function blog_func($atts)
 
 	// Exibe uma mensagem se houver filtro de tag ativo
 	if (!empty($_GET['tag'])) {
-		$content .= '<div class="filter-info mb-4">Exibindo posts com a tag: <strong>' . $_GET['tag'] . '</strong> (<a href="/blog">Remover o filtro</a>)</div>';
+		$content .= '<div class="filter-info mb-4">Exibindo posts com a tag: <strong>' . $_GET['tag'] . '</strong> <a href="/blog" class="btn btn-outline-gray btn-xs"><i class="fa-solid fa-xmark"></i> Remover</a></div>';
 	}
 
 	// Categories Filter
@@ -1106,3 +1474,29 @@ function observadados_redirect_category_to_blog()
 	}
 }
 add_action('template_redirect', 'observadados_redirect_category_to_blog');
+
+function observadados_redirect_cpts_to_publicacoes()
+{
+	if (is_singular('categoria')) {
+		$post = get_queried_object();
+		if (!$post)
+			$post = get_post();
+
+		if ($post && isset($post->post_name)) {
+			wp_redirect(home_url('/publicacoes/?categoria=' . $post->post_name), 301);
+			exit;
+		}
+	}
+
+	if (is_singular('autor')) {
+		$post = get_queried_object();
+		if (!$post)
+			$post = get_post();
+
+		if ($post && isset($post->post_name)) {
+			wp_redirect(home_url('/publicacoes/?autor=' . $post->post_name), 301);
+			exit;
+		}
+	}
+}
+add_action('template_redirect', 'observadados_redirect_cpts_to_publicacoes', 1);

@@ -23,7 +23,7 @@
 		</div>
 	</header><!-- .entry-header -->
 
-	<div class="container">
+	<div class="container px-0">
 		<div class="entry-content-boxed full-width px-0">
 			<div class="page-row">
 				<aside class="integrante-sidebar">
@@ -42,8 +42,7 @@
 
 					if ($lattes || $github || $x || $instagram || $linkedin):
 						?>
-						<ul class="team-social-single"
-							style="list-style: none; padding: 0; margin: 0; display: flex; gap: 1rem; align-items: center;">
+						<ul class="grid-item-social center">
 							<?php if ($lattes):
 								$lattes_svg_path = get_template_directory() . '/img/lattes.svg';
 								$lattes_icon = file_exists($lattes_svg_path) ? file_get_contents($lattes_svg_path) : 'Lattes';
