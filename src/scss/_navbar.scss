@@ -340,7 +340,7 @@
 		box-sizing: content-box;
 		background-clip: content-box;
 		transition: background-color 500ms ease-in-out 250ms;
-		background-color: $theme-quaternary;
+		background-color: $theme-primary;
 		position: absolute;
 		z-index: 1001;
 		right: 20px;
@@ -364,7 +364,7 @@
 			display: block;
 			width: 36px;
 			height: 4px;
-			background-color: $theme-quaternary;
+			background-color: $theme-primary;
 			transition: transform 500ms ease-in-out;
 			border-radius: 2px;
 		}

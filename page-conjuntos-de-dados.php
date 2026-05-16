@@ -54,11 +54,11 @@ get_header(); ?>
 										class="fa-solid fa-xmark"></i></a>
 							<?php endif; ?>
 
-							<button type="submit" class="btn-search"><i
+							<button type="submit" class="btn-search" aria-label="Buscar"><i
 									class="fa-solid fa-magnifying-glass"></i></button>
 							<button type="button" class="btn btn-outline-gray"
-								onclick="document.querySelector('.dataset-advanced-filters').style.display = document.querySelector('.dataset-advanced-filters').style.display === 'none' ? 'block' : 'none';"><i
-									class="fa-solid fa-filter"></i> Filtros</button>
+								onclick="document.querySelector('.dataset-advanced-filters').style.display = document.querySelector('.dataset-advanced-filters').style.display === 'none' ? 'block' : 'none';"
+								aria-label="Exibir filtros"><i class="fa-solid fa-filter"></i> Filtros</button>
 						</div>
 
 						<div class="dataset-advanced-filters"

@@ -39,6 +39,32 @@
 		}
 	}
 
+	&.btn-outline-white {
+		background: transparent;
+		border-color: white !important;
+		color: white;
+
+		&:focus,
+		&:hover {
+			background: white;
+			border-color: white;
+			color: $theme-primary;
+		}
+	}
+
+	&.btn-white {
+		background: white;
+		border-color: white !important;
+		color: $theme-primary;
+
+		&:focus,
+		&:hover {
+			background: $theme-primary;
+			border-color: $theme-primary;
+			color: white;
+		}
+	}
+
 	&.btn-outline-gray {
 		background: transparent;
 		border-color: $medium-gray;
@@ -61,5 +87,15 @@
 		font-size: .75rem;
 		padding: .25em .75em;
 		margin-top: 5px;
+	}
+
+	&.btn-lg {
+		font-size: 1rem;
+		padding: .75em 1em;
+	}
+
+	&.btn-xl {
+		font-size: 1.125rem;
+		padding: .75em 1em;
 	}
 }

@@ -1305,8 +1305,15 @@ function blog_func($atts)
 {
 
 	$a = shortcode_atts(array(
-		'posts_per_page' => get_option('posts_per_page')
+		'posts_per_page' => get_option('posts_per_page'),
+		'home' => 'false'
 	), $atts);
+
+	$is_home = ($a['home'] === 'true');
+
+	if ($is_home) {
+		$a['posts_per_page'] = 3;
+	}
 
 	$paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 
@@ -1344,38 +1351,40 @@ function blog_func($atts)
 
 	$content = '<div class="blog-list-container">';
 
-	// Exibe uma mensagem se houver filtro de tag ativo
-	if (!empty($_GET['tag'])) {
-		$content .= '<div class="filter-info mb-4">Exibindo posts com a tag: <strong>' . $_GET['tag'] . '</strong> <a href="/blog" class="btn btn-outline-gray btn-xs"><i class="fa-solid fa-xmark"></i> Remover</a></div>';
-	}
-
-	// Categories Filter
-	$base_url = get_permalink();
-	$current_args = $_GET;
-	unset($current_args['paged']);
-
-	$cat_atual = isset($_GET['categoria']) ? $_GET['categoria'] : '';
-
-	$content .= '<div class="filter-options mb-4">';
-
-	// "Todas"
-	$args_sem_cat = $current_args;
-	unset($args_sem_cat['categoria']);
-	$url_sem_cat = empty($args_sem_cat) ? $base_url : add_query_arg($args_sem_cat, $base_url);
-	$class_active = empty($cat_atual) ? 'active' : '';
-	$content .= '<a href="' . esc_url($url_sem_cat) . '" class="filter-badge ' . $class_active . '">Todas as categorias</a>';
-
-	$categorias = get_terms(array('taxonomy' => 'category', 'hide_empty' => true));
-	if (!is_wp_error($categorias) && !empty($categorias)) {
-		foreach ($categorias as $cat) {
-			$class_active = ($cat_atual === $cat->slug) ? 'active' : '';
-			$args_cat = $current_args;
-			$args_cat['categoria'] = $cat->slug;
-			$url_cat = add_query_arg($args_cat, $base_url);
-			$content .= '<a href="' . esc_url($url_cat) . '" class="filter-badge ' . $class_active . '">' . esc_html($cat->name) . '</a>';
+	if (!$is_home) {
+		// Exibe uma mensagem se houver filtro de tag ativo
+		if (!empty($_GET['tag'])) {
+			$content .= '<div class="filter-info mb-4">Exibindo posts com a tag: <strong>' . $_GET['tag'] . '</strong> <a href="/blog" class="btn btn-outline-gray btn-xs"><i class="fa-solid fa-xmark"></i> Remover</a></div>';
 		}
+
+		// Categories Filter
+		$base_url = get_permalink();
+		$current_args = $_GET;
+		unset($current_args['paged']);
+
+		$cat_atual = isset($_GET['categoria']) ? $_GET['categoria'] : '';
+
+		$content .= '<div class="filter-options mb-4">';
+
+		// "Todas"
+		$args_sem_cat = $current_args;
+		unset($args_sem_cat['categoria']);
+		$url_sem_cat = empty($args_sem_cat) ? $base_url : add_query_arg($args_sem_cat, $base_url);
+		$class_active = empty($cat_atual) ? 'active' : '';
+		$content .= '<a href="' . esc_url($url_sem_cat) . '" class="filter-badge ' . $class_active . '">Todas as categorias</a>';
+
+		$categorias = get_terms(array('taxonomy' => 'category', 'hide_empty' => true));
+		if (!is_wp_error($categorias) && !empty($categorias)) {
+			foreach ($categorias as $cat) {
+				$class_active = ($cat_atual === $cat->slug) ? 'active' : '';
+				$args_cat = $current_args;
+				$args_cat['categoria'] = $cat->slug;
+				$url_cat = add_query_arg($args_cat, $base_url);
+				$content .= '<a href="' . esc_url($url_cat) . '" class="filter-badge ' . $class_active . '">' . esc_html($cat->name) . '</a>';
+			}
+		}
+		$content .= '</div>';
 	}
-	$content .= '</div>';
 
 	// Grid
 	$content .= '<ul class="grid-container">';
@@ -1432,17 +1441,19 @@ function blog_func($atts)
 	$content .= '</ul>';
 
 	// Pagination
-	$big = 999999999;
-	$pagination = paginate_links(array(
-		'base' => str_replace($big, '%#%', esc_url(get_pagenum_link($big))),
-		'format' => '?paged=%#%',
-		'current' => max(1, get_query_var('paged')),
-		'total' => $loop->max_num_pages,
-		'prev_text' => '&laquo; Anterior',
-		'next_text' => 'Próxima &raquo;',
-	));
-	if ($pagination) {
-		$content .= '<div class="dataset-pagination">' . $pagination . '</div>';
+	if (!$is_home) {
+		$big = 999999999;
+		$pagination = paginate_links(array(
+			'base' => str_replace($big, '%#%', esc_url(get_pagenum_link($big))),
+			'format' => '?paged=%#%',
+			'current' => max(1, get_query_var('paged')),
+			'total' => $loop->max_num_pages,
+			'prev_text' => '&laquo; Anterior',
+			'next_text' => 'Próxima &raquo;',
+		));
+		if ($pagination) {
+			$content .= '<div class="dataset-pagination">' . $pagination . '</div>';
+		}
 	}
 
 	$content .= '</div>'; // .blog-list-container
@@ -1500,3 +1511,137 @@ function observadados_redirect_cpts_to_publicacoes()
 	}
 }
 add_action('template_redirect', 'observadados_redirect_cpts_to_publicacoes', 1);
+
+// [indicadores]
+function indicadores_shortcode()
+{
+	$count_dataset = wp_count_posts('dataset');
+	$num_dataset = $count_dataset ? $count_dataset->publish : 0;
+
+	$count_publicacao = wp_count_posts('publicacao');
+	$num_publicacao = $count_publicacao ? $count_publicacao->publish : 0;
+
+	// Calcula o total de downloads dos datasets
+	global $wpdb;
+	$total_downloads = (int) $wpdb->get_var("
+		SELECT SUM(meta_value) 
+		FROM {$wpdb->postmeta} 
+		JOIN {$wpdb->posts} ON post_id = ID 
+		WHERE post_type = 'dataset' AND post_status = 'publish' AND meta_key = 'downloads'
+	");
+
+	if ($total_downloads >= 1000) {
+		$num_downloads = round($total_downloads / 1000, 1) . 'k';
+	} else {
+		$num_downloads = $total_downloads;
+	}
+
+	// Valores estáticos conforme o design
+	$num_usuarios = '2.4k';
+	ob_start();
+	?>
+	<div class="indicadores-grid">
+		<div class="indicador-card">
+			<i class="fa-solid fa-database indicador-icon"></i>
+			<div class="indicador-number"><?php echo esc_html($num_dataset); ?></div>
+			<div class="indicador-label">Conjuntos de dados</div>
+		</div>
+		<div class="indicador-card">
+			<i class="fa-solid fa-book-open indicador-icon"></i>
+			<div class="indicador-number"><?php echo esc_html($num_publicacao); ?></div>
+			<div class="indicador-label">Publicações</div>
+		</div>
+		<!--
+		<div class="indicador-card">
+			<i class="fa-solid fa-users indicador-icon"></i>
+			<div class="indicador-number"><?php echo esc_html($num_usuarios); ?></div>
+			<div class="indicador-label">Usuários</div>
+		</div>
+		-->
+		<div class="indicador-card">
+			<i class="fa-solid fa-chart-line indicador-icon"></i>
+			<div class="indicador-number"><?php echo esc_html($num_downloads); ?></div>
+			<div class="indicador-label">Downloads</div>
+		</div>
+	</div>
+	<?php
+	return ob_get_clean();
+}
+add_shortcode('indicadores', 'indicadores_shortcode');
+
+// [dados_destaque]
+function dados_destaque_shortcode()
+{
+	$args = [
+		'post_type' => 'dataset',
+		'posts_per_page' => 3,
+		'orderby' => 'rand',
+		'meta_query' => [
+			[
+				'key' => 'destaque',
+				'value' => true
+			]
+		]
+	];
+	$loop = new WP_Query($args);
+	$content = '<div class="blog-list-container"><ul class="grid-container">';
+	if ($loop->have_posts()) {
+		while ($loop->have_posts()) {
+			$loop->the_post();
+
+			$title = get_the_title();
+			$link = get_permalink();
+			$resumo = get_the_excerpt();
+
+			if (!$resumo) {
+				$resumo = wp_trim_words(get_the_content(), 15);
+			}
+
+			$foto = get_the_post_thumbnail(get_the_ID(), 'medium_large', ['class' => 'img-fluid']);
+			if (!$foto) {
+				$foto = '<div class="image-placeholder" style="background-color: #0b3469; background-image: radial-gradient(circle, #e63946 20%, transparent 20%), radial-gradient(circle, #f4a261 20%, transparent 20%); background-size: 50px 50px; background-position: 0 0, 25px 25px; padding-bottom: 50%;"></div>';
+			}
+
+			// Tenta pegar tags, categorias ou taxonomia específica
+			$terms = wp_get_post_terms(get_the_ID(), array('category', 'post_tag', 'categoria', 'tema'));
+			$badges = '';
+			if (!is_wp_error($terms) && !empty($terms)) {
+				$count = 0;
+				foreach ($terms as $term) {
+					$badges .= '<span class="badge badge-light" style="margin-right:0.25rem;">' . esc_html($term->name) . '</span>';
+					$count++;
+					if ($count >= 2)
+						break; // Exibe no máximo 2 badges
+				}
+			}
+
+			$downloads = (int) get_field('downloads');
+
+			$content .= '<li class="grid-item blog-post" style="display:flex; flex-direction:column;">';
+			$content .= '<div class="grid-item-photo"><a href="' . esc_url($link) . '">' . $foto . '</a></div>';
+			$content .= '<div class="grid-item-info" style="flex:1; display:flex; flex-direction:column;">';
+
+			if ($badges) {
+				$content .= '<div class="mb-2">' . $badges . '</div>';
+			}
+
+			$content .= '<h3 class="grid-item-title"><a href="' . esc_url($link) . '">' . esc_html($title) . '</a></h3>';
+			$content .= '<div class="grid-item-desc mb-3">' . $resumo . '</div>';
+
+			$content .= '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:1rem; border-top:1px solid #f1f5f9;">';
+			$content .= '<span style="font-size:0.875rem; color:#888;">' . $downloads . ' downloads</span>';
+			$content .= '<a href="' . esc_url($link) . '" style="font-size:0.875rem; color:#0b3469; font-weight:600; text-decoration:none;">Ver detalhes &rarr;</a>';
+			$content .= '</div>';
+
+			$content .= '</div>'; // .grid-item-info
+			$content .= '</li>';
+		}
+	} else {
+		$content .= '<p>Nenhum conjunto de dados em destaque encontrado.</p>';
+	}
+	$content .= '</ul></div>';
+	wp_reset_postdata();
+
+	return $content;
+}
+add_shortcode('dados_destaque', 'dados_destaque_shortcode');

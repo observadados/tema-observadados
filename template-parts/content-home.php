@@ -9,50 +9,19 @@
 ?>
 <header id="main-banner">
 	<div class="container">
-		<?php
-		// Slides
-		$args = [
-			'post_type'	=> 'slide'
-		];
-
-		$loop = new WP_Query( $args );
-
-		if($loop->have_posts()) {
-			echo '<div class="owl-carousel slider">';
-			while( $loop->have_posts()){
-				$loop->the_post();
-				//print_r(get_field('imagem'));
-
-				$titulo = get_the_title();
-				$subtitulo = get_field('subtitulo');
-				$texto_de_destaque = get_field('texto_de_destaque');
-				$link = get_field('link');
-
-				if ($link)
-					echo '<a class="slide-item" href="' . $link . '">';
-				else
-					echo '<div class="slide-item">';
-
-				echo '<div class="slide-item-text">';
-				if ($texto_de_destaque) echo '<span>' . $texto_de_destaque . '</span>';
-				if ($titulo) echo '<h2>' . $titulo . '</h2>';
-				if ($subtitulo) echo '<p>' . $subtitulo . '</p>';
-				echo '</div>';
-
-				if (has_post_thumbnail()) {
-					echo '<div class="slide-item-image"><figure>';
-					the_post_thumbnail( $post->ID, 'full' );
-					echo '</figure></div>';
-				}
-
-				if ($link)
-					echo '</a>';
-				else
-				echo '</div>';
-
-			}
-			echo '</div>';
-		}
-		?>
+		<div class="banner-grid">
+			<div class="banner-content">
+				<h1>Observatório de Dados Abertos sobre Segurança Pública</h1>
+				<p>Acesse, explore e contribua com dados sobre segurança pública no Brasil. Transparência e informação para uma sociedade mais segura.</p>
+				
+				<form role="search" method="get" class="banner-search-form" action="<?php echo esc_url(home_url('/conjuntos-de-dados/')); ?>">
+					<input type="search" class="search-field" placeholder="Buscar conjuntos de dados" value="" name="busca" />
+					<button type="submit" class="search-submit" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass"></i></button>
+				</form>
+			</div>
+			<div class="banner-image">
+				<img src="<?php echo esc_url(home_url('/wp-content/uploads/2026/04/banner-inicial.png')); ?>" alt="Ilustração de dados e segurança pública">
+			</div>
+		</div>
 	</div>
 </header>

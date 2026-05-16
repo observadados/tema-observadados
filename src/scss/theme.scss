@@ -5,10 +5,12 @@
 @import "navbar";
 @import "footer";
 @import "banner";
+@import "home";
 @import "buttons";
 @import "dataset";
 @import "grid";
 @import "links";
+@import "pages";
 
 body {
 	font-family: $font;
@@ -101,6 +103,10 @@ a.active {
 .px-0 {
 	padding-left: 0 !important;
 	padding-right: 0 !important;
+}
+.py-0 {
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
 }
 
 .spacer {
@@ -352,6 +358,9 @@ a.badge.active {
 					p {
 						&:last-of-type {
 							margin-bottom: 0;
+						}
+						&:empty {
+							display: none;
 						}
 					}
 				}
@@ -791,7 +800,7 @@ a.badge.active {
 	height: 40px;
 	text-align: center;
 	line-height: 40px;
-	background: $theme-quaternary;
+	background: $theme-secondary;
 	color: white;
 	font-size: 1.5rem;
 	opacity: 0;
@@ -800,7 +809,7 @@ a.badge.active {
 	&:hover,
 	&:focus {
 		color: white;
-		background: $theme-secondary;
+		background: $theme-tertiary;
 	}
 
 	&.fixed {

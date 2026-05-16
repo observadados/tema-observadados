@@ -1,0 +1,97 @@
+// SECTION
+.home-section {
+	padding: 2rem 0;
+
+	@media (min-width: $break-screen) {
+		padding: 4rem 0;
+	}
+
+	.home-section-title {
+		font-weight: 800;
+		margin: 0 0 1rem;
+		font-size: 1.5rem;
+		text-transform: none;
+		color: $text-color;
+
+		@media (min-width:$break-screen) {
+			font-size: 1.75rem;
+		}
+	}
+
+	&#contribua {
+		background: $theme-primary;
+		color: white;
+
+		.home-section-title {
+			color: white;
+			font-size: 1.75rem;
+			margin-bottom: .25rem;
+
+			@media (min-width:$break-screen) {
+				font-size: 2.25rem;
+			}
+		}
+
+		p {
+			font-size: 1rem;
+		}
+		
+		.btn-container {
+			justify-content: flex-start;
+		}
+	}
+}
+
+.btn-container {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 1rem;
+}
+
+// Indicadores
+.indicadores-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 1rem;
+
+	@media (min-width: 768px) {
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 2rem;
+	}
+
+	.indicador-card {
+		background: #ffffff;
+		border-radius: .75rem;
+		padding: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		border: 1px solid $light-gray;
+
+		.indicador-icon {
+			font-size: 2rem;
+			color: $theme-primary;
+			margin-bottom: 1rem;
+		}
+
+		.indicador-number {
+			font-size: 2rem;
+			font-weight: 900;
+			color: $theme-primary;
+			line-height: 1.2;
+			margin-bottom: 0.25rem;
+
+			@media (min-width: 992px) {
+				font-size: 2.5rem;
+			}
+		}
+
+		.indicador-label {
+			font-size: 0.875rem;
+			color: $theme-primary;
+			font-weight: 300;
+			line-height: 1.4;
+		}
+	}
+}

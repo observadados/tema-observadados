@@ -5,70 +5,54 @@ Template Name: Home
 
 get_header(); ?>
 
-	<?php
-		get_template_part( 'template-parts/content', 'home' );
-	?>
+<?php
+get_template_part('template-parts/content', 'home');
+?>
 
-	<?php
-		$args = array(
-			'post_type' => 'secao'
-		);
+<!-- Indicadores -->
+<section class="home-section py-0" id="indicadores">
+	<div class="container">
+		<?php echo do_shortcode('[indicadores]') ?>
+	</div>
+</section>
 
-		$loop = new WP_Query( $args );
+<!-- Conjuntos de destaques -->
+<section class="home-section" id="conjuntos-de-dados">
+	<div class="container">
+		<h3 class="home-section-title">Conjuntos de Dados em Destaque</h3>
+		<?php echo do_shortcode('[dados_destaque]') ?>
+		<div class="btn-container mt-4"><a href="<?php echo get_permalink(get_page_by_path('conjuntos-de-dados')) ?>"
+				class="btn btn-outline">Todos
+				conjuntos de dados</a></div>
+	</div>
+</section>
 
-	    if($loop->have_posts()){
-	        while( $loop->have_posts()){
-	            $loop->the_post();
+<!-- Contribua para transparência -->
+<section class="home-section" id="contribua">
+	<div class="container">
+		<h3 class="home-section-title">Contribua com a Transparência</h3>
+		<p>Trabalha com dados sobre segurança pública? Compartilhe com a comunidade e ajude a construir um Brasil mais
+			transparente e seguro.</p>
+		<div class="btn-container">
+			<a href="<?php echo get_permalink(get_page_by_path('cadastrar-dados')) ?>"
+				class="btn btn-lg btn-white">Cadastrar
+				dados</a>
+			<a href="<?php echo get_permalink(get_page_by_path('colabore')) ?>"
+				class="btn btn-lg btn-outline-white">Saiba
+				como
+				colaborar</a>
+		</div>
+	</div>
+</section>
 
-				if (get_field('cor_de_texto') != '#333333' || get_field('cor_de_fundo') != '#ffffff') {
-					echo '<style>';
-					if (get_field('cor_de_texto') != '#333333') {
-						echo '#' . $post->post_name . ' *:not(.wp-block-button__link) {';
-						echo 'color: '. get_field('cor_de_texto') . ' !important';
-						echo '}';
-					}
-					if (get_field('cor_de_fundo') != '#ffffff') {
-						echo '#' . $post->post_name . ' {';
-						echo 'background: '. get_field('cor_de_fundo') . ' !important';
-						echo '}';
-					}
-					echo '</style>';
-				}
-	            ?>
-
-	            <section class="section section-home" id="<?php echo $post->post_name; ?>">
-
-					<?php if (get_field('exibir_titulo')) : ?>
-		            	<h1 class="section-header"><?php the_title() ?></h1>
-					<?php endif; ?>
-
-					<div class="section-container">
-
-					<?php if (get_the_post_thumbnail($post->ID)) : ?>
-	            	<div class="section-thumbnail">
-						<?php the_post_thumbnail( $post->ID, 'medium' ); ?>
-					</div>
-
-					<div class="section-text">
-						<?php the_content(); ?>
-	            	</div>
-
-					<?php else : ?>
-
-					<div class="section-text full-width">
-						<?php the_content(); ?>
-	            	</div>
-
-					<?php endif; ?>
-					</div>
-
-	            </section>
-
-	            <?php
-	        }
-	    }
-
-		wp_reset_query();
-	?>
+<!-- Últimas do blog -->
+<section class="home-section" id="blog">
+	<div class="container">
+		<h3 class="home-section-title">Últimas do blog</h3>
+		<?php echo do_shortcode('[blog home="true"]') ?>
+		<div class="btn-container mt-4"><a href="<?php echo get_permalink(get_page_by_path('blog')) ?>"
+				class="btn btn-outline">Mais posts</a></div>
+	</div>
+</section>
 
 <?php get_footer(); ?>

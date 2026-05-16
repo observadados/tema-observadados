@@ -11,20 +11,21 @@
 
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?> class="no-js">
+
 <head>
-	<meta charset="<?php bloginfo( 'charset' ); ?>">
+	<meta charset="<?php bloginfo('charset'); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="profile" href="https://gmpg.org/xfn/11">
-	<?php if ( is_singular() && pings_open( get_queried_object() ) ) : ?>
-	<link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>">
+	<?php if (is_singular() && pings_open(get_queried_object())): ?>
+		<link rel="pingback" href="<?php bloginfo('pingback_url'); ?>">
 	<?php endif; ?>
 	<?php wp_head(); ?>
 </head>
 
 
 <body <?php body_class(); ?>>
-<div id="page" class="site">
-		<a class="skip-link screen-reader-text" href="#content"><?php _e( 'Skip to content', 'enajus' ); ?></a>
+	<div id="page" class="site">
+		<a class="skip-link screen-reader-text" href="#content"><?php _e('Ir para o conteúdo', 'enajus'); ?></a>
 
 		<header id="masthead">
 
@@ -35,37 +36,39 @@
 			<div class="site-header-main">
 
 				<div class="site-branding">
-					<?php if ( is_front_page()) : ?>
+					<?php if (is_front_page()): ?>
 						<h1 class="site-title"><?php observadados_the_custom_logo(); ?>
-						<?php
-							$logo_rodape = get_field( 'logo_do_rodape', 'option' );
-							if ( $logo_rodape)
+							<?php
+							$logo_rodape = get_field('logo_do_rodape', 'option');
+							if ($logo_rodape)
 								echo '<img src="' . $logo_rodape['url'] . '" class="logo-home" alt="' . get_the_title() . '">';
-						?></h1>
-					<?php else : ?>
+							?>
+						</h1>
+					<?php else: ?>
 						<p class="site-title"><?php observadados_the_custom_logo(); ?></p>
 					<?php endif; ?>
 				</div>
 
 				<div id="site-header-menus">
 
-					<?php if ( has_nav_menu( 'primary' ) ) : ?>
-						<nav id="site-navigation" class="main-navigation" role="navigation" aria-label="<?php esc_attr_e( 'Primary Menu', 'enajus' ); ?>">
+					<?php if (has_nav_menu('primary')): ?>
+						<nav id="site-navigation" class="main-navigation" role="navigation"
+							aria-label="<?php esc_attr_e('Primary Menu', 'enajus'); ?>">
 							<?php
-								wp_nav_menu( array(
-									'theme_location' => 'primary',
-									'menu_class'     => 'primary-menu',
-									) );
+							wp_nav_menu(array(
+								'theme_location' => 'primary',
+								'menu_class' => 'primary-menu',
+							));
 							?>
 						</nav>
 					<?php endif; ?>
-					<?php if ( has_nav_menu( 'featured' ) ) : ?>
+					<?php if (has_nav_menu('featured')): ?>
 						<nav class="featured-navigation">
 							<?php
-								wp_nav_menu( array(
-									'theme_location' => 'featured',
-									'menu_class'     => 'featured-menu',
-									) );
+							wp_nav_menu(array(
+								'theme_location' => 'featured',
+								'menu_class' => 'featured-menu',
+							));
 							?>
 						</nav>
 					<?php endif; ?>
