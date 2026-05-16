@@ -98,4 +98,20 @@
 		</div>
 	</div>
 
+
+	<?php
+	$equipe_page = get_page_by_path('equipe');
+	$equipe_id = $equipe_page ? $equipe_page->ID : 0;
+
+	if ($equipe_id && have_rows('conteudo_adicional', $equipe_id)): ?>
+		<?php while (have_rows('conteudo_adicional', $equipe_id)):
+			the_row(); ?>
+			<div class="entry-content-boxed full-width">
+				<div class="entry-content entry-content-box additional-content" <?php if (get_sub_field('cor')): ?>style="background-color: <?php echo get_sub_field('cor'); ?>" <?php endif; ?>>
+					<?php echo get_sub_field('conteudo'); ?>
+				</div>
+			</div>
+		<?php endwhile; ?>
+	<?php endif; ?>
+
 </article><!-- #post-## -->

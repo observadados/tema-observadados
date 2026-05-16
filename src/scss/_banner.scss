@@ -67,6 +67,7 @@
 			transition: .3s ease-in-out all;
 
 			&:focus {
+				background: white;
 				border-color: $theme-primary;
 			}
 			

@@ -50,10 +50,14 @@
 				</div><!-- .entry-content -->
 			<?php endif; ?>
 
-			<?php if (get_field('conteudo_adicional')): ?>
-				<div class="entry-content entry-content-box additional-content">
-					<?php echo get_field('conteudo_adicional'); ?>
-				</div>
+			<?php if (have_rows('conteudo_adicional')): ?>
+				<?php while (have_rows('conteudo_adicional')):
+					the_row(); ?>
+					<div class="entry-content entry-content-box additional-content" <?php if (get_sub_field('cor')): ?>style="background-color: <?php echo get_sub_field('cor'); ?>
+						" <?php endif; ?>>
+						<?php echo get_sub_field('conteudo'); ?>
+					</div>
+				<?php endwhile; ?>
 			<?php endif; ?>
 		</div><!-- .entry-content-boxed -->
 	<?php endif; ?>

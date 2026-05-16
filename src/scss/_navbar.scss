@@ -121,8 +121,12 @@
 
 
 		nav.main-navigation {
-			margin: 0;
+			margin: 15px 15px 0;
 			font-family: $font;
+
+			@media (min-width: $break-screen) {
+				margin: 0;
+			}
 
 			li:hover>ul,
 			li.focus>ul {
@@ -158,7 +162,7 @@
 					&>a {
 						line-height: 1;
 						font-size: 1rem;
-						font-weight: normal;
+						font-weight: bold;
 						color: $theme-primary;
 						text-transform: none;
 						padding: .75rem .25rem;
@@ -169,6 +173,7 @@
 						@media (min-width:$break-screen) {
 							padding: .5rem 0;
 							font-size: .75rem;
+							font-weight: normal;
 						}
 
 						@media (min-width:1250px) {
@@ -279,12 +284,13 @@
 
 			ul {
 				list-style: none;
-				padding: 0;
+				padding: 15px;
 				margin: 0;
+				display: flex;
+				gap: 1rem;
 
 				@media (min-width: $break-screen) {
-					display: flex;
-					gap: 1rem;
+					padding: 0;
 				}
 
 				li {
