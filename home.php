@@ -51,7 +51,7 @@ get_template_part('template-parts/content', 'home');
 		<h3 class="home-section-title">Últimas do blog</h3>
 		<?php echo do_shortcode('[blog home="true"]') ?>
 		<div class="btn-container mt-4"><a href="<?php echo get_permalink(get_page_by_path('blog')) ?>"
-				class="btn btn-outline">Mais posts do blog</a></div>
+				class="btn btn-outline">Mais posts</a></div>
 	</div>
 </section>
 
