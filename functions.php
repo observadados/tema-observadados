@@ -494,7 +494,7 @@ function redes_func($atts)
 		while ($loop->have_posts()) {
 			$loop->the_post();
 			if (!((bool) $a['destaque']) || get_field('destaque'))
-				$content .= "<li><a href='" . get_field('url') . "' title={the_title()} target='" . get_field('alvo') . "'>" . get_field('icone') . "</a></li>";
+				$content .= "<li><a href='" . get_field('link') . "' title={the_title()} target='" . get_field('alvo') . "'>" . get_field('icone') . "</a></li>";
 		}
 	}
 	$content .= '</ul>';
