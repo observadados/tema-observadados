@@ -1656,6 +1656,15 @@ add_action('rest_api_init', function () {
             return current_user_can('upload_files');
         }
     ));
+    
+    register_rest_route('observadados/v1', '/send-report', array(
+        'methods' => 'POST',
+        'callback' => 'observadados_send_report_handler',
+        'permission_callback' => function () {
+            // Utiliza a mesma autenticação REST segura configurada no seu .env
+            return current_user_can('upload_files');
+        }
+    ));
 });
 
 // Manipulador de upload de datasets
@@ -1703,4 +1712,94 @@ function observadados_upload_dataset_handler($request) {
         'id' => $attachment_id,
         'url' => $file_url
     );
+}
+
+// Manipulador para envio do relatório por e-mail delegando ao WordPress (wp_mail)
+function observadados_send_report_handler($request) {
+    $params = $request->get_json_params();
+    if (empty($params['published_items'])) {
+        return new WP_Error('no_items', 'Nenhum item publicado fornecido.', array('status' => 400));
+    }
+    
+    $published_items = $params['published_items'];
+    $admin_email = get_option('admin_email');
+    if (empty($admin_email)) {
+        $admin_email = 'admin_wordpress@exemplo.com'; // fallback padrão
+    }
+    
+    // Construção de tabela HTML elegante
+    $rows_html = '';
+    foreach ($published_items as $item) {
+        $action_color = $item['action'] === 'Atualizado' ? '#3182ce' : '#319795';
+        $status_color = $item['status'] === 'draft' ? '#e53e3e' : '#2f855a';
+        $wp_url = home_url();
+        $admin_link = $wp_url . '/wp-admin/post.php?post=' . $item['wp_post_id'] . '&action=edit';
+        
+        $rows_html .= '
+        <tr style="border-bottom: 1px solid #dddddd;">
+            <td style="padding: 12px 15px; font-family: sans-serif;">' . esc_html($item['collector_key']) . '</td>
+            <td style="padding: 12px 15px; font-family: sans-serif;">' . esc_html($item['uf']) . '</td>
+            <td style="padding: 12px 15px; font-family: sans-serif;">' . esc_html($item['filename']) . '</td>
+            <td style="padding: 12px 15px; font-family: sans-serif; font-weight: bold; color: ' . $action_color . ';">' . esc_html($item['action']) . '</td>
+            <td style="padding: 12px 15px; font-family: sans-serif; font-weight: bold; color: ' . $status_color . ';">' . esc_html(strtoupper($item['status'])) . '</td>
+            <td style="padding: 12px 15px; font-family: sans-serif;"><a href="' . esc_url($admin_link) . '" style="color: #3182ce; text-decoration: none;">ID ' . esc_html($item['wp_post_id']) . '</a></td>
+        </tr>';
+    }
+
+    $subject = '🔔 ObservaDados: Relatório de Publicação - ' . current_time('d/m/Y H:i');
+    
+    $html_content = '
+    <html>
+    <body style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; background-color: #f7fafc; color: #2d3748; padding: 20px; margin: 0;">
+        <div style="max-width: 800px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-top: 5px solid #3182ce;">
+            <div style="background-color: #2b6cb0; padding: 30px; text-align: center; color: white;">
+                <h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 0.5px;">ObservaDados - Coletores</h1>
+                <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 14px;">Relatório Automático de Coleta e Publicação</p>
+            </div>
+            <div style="padding: 30px;">
+                <p style="font-size: 16px; line-height: 1.6; margin-top: 0;">Olá, Administrador,</p>
+                <p style="font-size: 16px; line-height: 1.6;">O processo de coleta automática foi executado e os seguintes datasets foram criados ou atualizados no WordPress com novos arquivos baixados:</p>
+                
+                <div style="margin-top: 25px; margin-bottom: 25px; overflow-x: auto;">
+                    <table style="border-collapse: collapse; width: 100%; text-align: left; font-size: 14px; min-width: 600px;">
+                        <thead>
+                            <tr style="background-color: #f7fafc; border-bottom: 2px solid #e2e8f0; color: #4a5568;">
+                                <th style="padding: 12px 15px; font-weight: 600;">Coletor</th>
+                                <th style="padding: 12px 15px; font-weight: 600;">UF</th>
+                                <th style="padding: 12px 15px; font-weight: 600;">Arquivo</th>
+                                <th style="padding: 12px 15px; font-weight: 600;">Ação</th>
+                                <th style="padding: 12px 15px; font-weight: 600;">Status do Post</th>
+                                <th style="padding: 12px 15px; font-weight: 600;">Link Admin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ' . $rows_html . '
+                        </tbody>
+                    </table>
+                </div>
+                
+                <p style="font-size: 14px; color: #718096; line-height: 1.6;">Nota: Os datasets marcados como <strong>DRAFT</strong> (Rascunho) foram cadastrados pela primeira vez e requerem revisão e publicação manual pelo administrador.</p>
+                
+                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+                
+                <p style="font-size: 12px; color: #a0aec0; text-align: center; margin: 0;">Este é um e-mail automático enviado pelo sistema de coletores ObservaDados. Por favor, não responda diretamente a esta mensagem.</p>
+            </div>
+        </div>
+    </body>
+    </html>';
+
+    // Cabeçalhos para enviar e-mail HTML com wp_mail()
+    $headers = array('Content-Type: text/html; charset=UTF-8');
+    
+    // Dispara o e-mail delegando ao WordPress, que por sua vez utiliza as configurações do WP Mail SMTP (Gmail OAuth)
+    $sent = wp_mail($admin_email, $subject, $html_content, $headers);
+    
+    if ($sent) {
+        return array(
+            'success' => true, 
+            'message' => 'Relatório enviado com sucesso via wp_mail() e WP Mail SMTP.'
+        );
+    } else {
+        return new WP_Error('send_failed', 'Falha ao enviar o e-mail via wp_mail().', array('status' => 500));
+    }
 }
