@@ -1645,3 +1645,62 @@ function dados_destaque_shortcode()
 	return $content;
 }
 add_shortcode('dados_destaque', 'dados_destaque_shortcode');
+
+// Registrar endpoint customizado para upload de datasets
+add_action('rest_api_init', function () {
+    register_rest_route('observadados/v1', '/upload-dataset', array(
+        'methods' => 'POST',
+        'callback' => 'observadados_upload_dataset_handler',
+        'permission_callback' => function () {
+            // Utiliza a mesma autenticação REST segura configurada no seu .env
+            return current_user_can('upload_files');
+        }
+    ));
+});
+
+// Manipulador de upload de datasets
+function observadados_upload_dataset_handler($request) {
+    $params = $request->get_params();
+    $uf = strtoupper(sanitize_text_field($params['uf'] ?? 'BR'));
+    $collector_key = sanitize_text_field($params['collector_key'] ?? 'generic');
+    
+    $files = $request->get_file_params();
+    if (empty($files['file'])) {
+        return new WP_Error('no_file', 'Nenhum arquivo enviado.', array('status' => 400));
+    }
+    
+    // Filtro dinâmico e temporário para alterar a pasta de upload padrão do WordPress
+    $custom_dir_filter = function($uploads) use ($uf, $collector_key) {
+        $subdir = '/datasets/' . $uf . '/' . $collector_key;
+        $uploads['subdir'] = $subdir;
+        $uploads['path'] = $uploads['basedir'] . $subdir;
+        $uploads['url'] = $uploads['baseurl'] . $subdir;
+        return $uploads;
+    };
+    
+    // Ativa o filtro
+    add_filter('upload_dir', $custom_dir_filter);
+    
+    // Carrega dependências nativas para upload de mídias no WordPress
+    require_once(ABSPATH . 'wp-admin/includes/image.php');
+    require_once(ABSPATH . 'wp-admin/includes/file.php');
+    require_once(ABSPATH . 'wp-admin/includes/media.php');
+    
+    // Faz o upload físico (na pasta isolada) e registra a mídia no banco do WordPress
+    $attachment_id = media_handle_upload('file', 0);
+    
+    // Remove o filtro imediatamente após a conclusão para não afetar outros uploads do painel
+    remove_filter('upload_dir', $custom_dir_filter);
+    
+    if (is_wp_error($attachment_id)) {
+        return $attachment_id;
+    }
+    
+    $file_url = wp_get_attachment_url($attachment_id);
+    
+    return array(
+        'success' => true,
+        'id' => $attachment_id,
+        'url' => $file_url
+    );
+}
