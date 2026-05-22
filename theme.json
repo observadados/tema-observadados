@@ -1,0 +1,33 @@
+{
+  "version": 3,
+  "settings": {
+    "layout": {
+      "contentSize": "900px",
+      "wideSize": "1170px"
+    },
+    "typography": {
+      "fontFamilies": [
+        {
+          "fontFamily": "\"Inter\", sans-serif",
+          "name": "Inter",
+          "slug": "inter",
+          "fontFace": [
+            {
+              "fontFamily": "Inter",
+              "fontStyle": "normal",
+              "fontWeight": "100 900",
+              "src": [
+                "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "styles": {
+    "typography": {
+      "fontFamily": "var(--wp--preset--font-family--inter)"
+    }
+  }
+}
