@@ -528,7 +528,6 @@ function equipe_func($atts)
 			$nome = get_the_title();
 			$link = get_permalink();
 			$papel = get_field('papel');
-			$resumo = get_the_excerpt();
 
 			$foto = get_the_post_thumbnail(get_the_ID(), 'medium', ['class' => 'img-fluid']);
 			if (!$foto) {
@@ -536,6 +535,7 @@ function equipe_func($atts)
 			}
 
 			$lattes = get_field('lattes');
+			$orcid = get_field('orcid');
 			$github = get_field('github');
 			$x = get_field('x');
 			$instagram = get_field('instagram');
@@ -546,6 +546,9 @@ function equipe_func($atts)
 				$lattes_svg_path = get_template_directory() . '/img/lattes.svg';
 				$lattes_icon = file_exists($lattes_svg_path) ? file_get_contents($lattes_svg_path) : 'Lattes';
 				$social_html .= '<li><a href="' . esc_url($lattes) . '" target="_blank" title="Lattes">' . $lattes_icon . '</a></li>';
+			}
+			if ($orcid) {
+				$social_html .= '<li><a href="' . esc_url($orcid) . '" target="_blank" title="OrcID"><i class="fab fa-orcid"></i></a></li>';
 			}
 			if ($github) {
 				$social_html .= '<li><a href="' . esc_url($github) . '" target="_blank" title="GitHub"><i class="fab fa-github"></i></a></li>';
@@ -568,9 +571,6 @@ function equipe_func($atts)
 			$content .= '<h3 class="grid-item-title"><a href="' . esc_url($link) . '">' . esc_html($nome) . '</a></h3>';
 			if ($papel) {
 				$content .= '<span class="grid-item-role">' . esc_html($papel) . '</span>';
-			}
-			if ($resumo) {
-				$content .= '<div class="grid-item-desc">' . $resumo . '</div>';
 			}
 
 			$content .= $social_html;
@@ -1541,16 +1541,16 @@ function indicadores_shortcode()
 	ob_start();
 	?>
 	<div class="indicadores-grid">
-		<div class="indicador-card">
+		<a href="<?php echo esc_url(home_url('/conjuntos-de-dados')); ?>" class="indicador-card">
 			<i class="fa-solid fa-database indicador-icon"></i>
 			<div class="indicador-number"><?php echo esc_html($num_dataset); ?></div>
 			<div class="indicador-label">Conjuntos de dados</div>
-		</div>
-		<div class="indicador-card">
+		</a>
+		<a href="<?php echo esc_url(home_url('/publicacoes')); ?>" class="indicador-card">
 			<i class="fa-solid fa-book-open indicador-icon"></i>
 			<div class="indicador-number"><?php echo esc_html($num_publicacao); ?></div>
 			<div class="indicador-label">Publicações</div>
-		</div>
+		</a>
 		<!--
 		<div class="indicador-card">
 			<i class="fa-solid fa-users indicador-icon"></i>
@@ -1558,11 +1558,11 @@ function indicadores_shortcode()
 			<div class="indicador-label">Usuários</div>
 		</div>
 		-->
-		<div class="indicador-card">
+		<a href="<?php echo esc_url(home_url('/conjuntos-de-dados')); ?>" class="indicador-card">
 			<i class="fa-solid fa-chart-line indicador-icon"></i>
 			<div class="indicador-number"><?php echo esc_html($num_downloads); ?></div>
 			<div class="indicador-label">Downloads</div>
-		</div>
+		</a>
 	</div>
 	<?php
 	return ob_get_clean();
@@ -1648,94 +1648,96 @@ add_shortcode('dados_destaque', 'dados_destaque_shortcode');
 
 // Registrar endpoint customizado para upload de datasets
 add_action('rest_api_init', function () {
-    register_rest_route('observadados/v1', '/upload-dataset', array(
-        'methods' => 'POST',
-        'callback' => 'observadados_upload_dataset_handler',
-        'permission_callback' => function () {
-            // Utiliza a mesma autenticação REST segura configurada no seu .env
-            return current_user_can('upload_files');
-        }
-    ));
-    
-    register_rest_route('observadados/v1', '/send-report', array(
-        'methods' => 'POST',
-        'callback' => 'observadados_send_report_handler',
-        'permission_callback' => function () {
-            // Utiliza a mesma autenticação REST segura configurada no seu .env
-            return current_user_can('upload_files');
-        }
-    ));
+	register_rest_route('observadados/v1', '/upload-dataset', array(
+		'methods' => 'POST',
+		'callback' => 'observadados_upload_dataset_handler',
+		'permission_callback' => function () {
+			// Utiliza a mesma autenticação REST segura configurada no seu .env
+			return current_user_can('upload_files');
+		}
+	));
+
+	register_rest_route('observadados/v1', '/send-report', array(
+		'methods' => 'POST',
+		'callback' => 'observadados_send_report_handler',
+		'permission_callback' => function () {
+			// Utiliza a mesma autenticação REST segura configurada no seu .env
+			return current_user_can('upload_files');
+		}
+	));
 });
 
 // Manipulador de upload de datasets
-function observadados_upload_dataset_handler($request) {
-    $params = $request->get_params();
-    $uf = strtoupper(sanitize_text_field($params['uf'] ?? 'BR'));
-    $collector_key = sanitize_text_field($params['collector_key'] ?? 'generic');
-    
-    $files = $request->get_file_params();
-    if (empty($files['file'])) {
-        return new WP_Error('no_file', 'Nenhum arquivo enviado.', array('status' => 400));
-    }
-    
-    // Filtro dinâmico e temporário para alterar a pasta de upload padrão do WordPress
-    $custom_dir_filter = function($uploads) use ($uf, $collector_key) {
-        $subdir = '/datasets/' . $uf . '/' . $collector_key;
-        $uploads['subdir'] = $subdir;
-        $uploads['path'] = $uploads['basedir'] . $subdir;
-        $uploads['url'] = $uploads['baseurl'] . $subdir;
-        return $uploads;
-    };
-    
-    // Ativa o filtro
-    add_filter('upload_dir', $custom_dir_filter);
-    
-    // Carrega dependências nativas para upload de mídias no WordPress
-    require_once(ABSPATH . 'wp-admin/includes/image.php');
-    require_once(ABSPATH . 'wp-admin/includes/file.php');
-    require_once(ABSPATH . 'wp-admin/includes/media.php');
-    
-    // Faz o upload físico (na pasta isolada) e registra a mídia no banco do WordPress
-    $attachment_id = media_handle_upload('file', 0);
-    
-    // Remove o filtro imediatamente após a conclusão para não afetar outros uploads do painel
-    remove_filter('upload_dir', $custom_dir_filter);
-    
-    if (is_wp_error($attachment_id)) {
-        return $attachment_id;
-    }
-    
-    $file_url = wp_get_attachment_url($attachment_id);
-    
-    return array(
-        'success' => true,
-        'id' => $attachment_id,
-        'url' => $file_url
-    );
+function observadados_upload_dataset_handler($request)
+{
+	$params = $request->get_params();
+	$uf = strtoupper(sanitize_text_field($params['uf'] ?? 'BR'));
+	$collector_key = sanitize_text_field($params['collector_key'] ?? 'generic');
+
+	$files = $request->get_file_params();
+	if (empty($files['file'])) {
+		return new WP_Error('no_file', 'Nenhum arquivo enviado.', array('status' => 400));
+	}
+
+	// Filtro dinâmico e temporário para alterar a pasta de upload padrão do WordPress
+	$custom_dir_filter = function ($uploads) use ($uf, $collector_key) {
+		$subdir = '/datasets/' . $uf . '/' . $collector_key;
+		$uploads['subdir'] = $subdir;
+		$uploads['path'] = $uploads['basedir'] . $subdir;
+		$uploads['url'] = $uploads['baseurl'] . $subdir;
+		return $uploads;
+	};
+
+	// Ativa o filtro
+	add_filter('upload_dir', $custom_dir_filter);
+
+	// Carrega dependências nativas para upload de mídias no WordPress
+	require_once(ABSPATH . 'wp-admin/includes/image.php');
+	require_once(ABSPATH . 'wp-admin/includes/file.php');
+	require_once(ABSPATH . 'wp-admin/includes/media.php');
+
+	// Faz o upload físico (na pasta isolada) e registra a mídia no banco do WordPress
+	$attachment_id = media_handle_upload('file', 0);
+
+	// Remove o filtro imediatamente após a conclusão para não afetar outros uploads do painel
+	remove_filter('upload_dir', $custom_dir_filter);
+
+	if (is_wp_error($attachment_id)) {
+		return $attachment_id;
+	}
+
+	$file_url = wp_get_attachment_url($attachment_id);
+
+	return array(
+		'success' => true,
+		'id' => $attachment_id,
+		'url' => $file_url
+	);
 }
 
 // Manipulador para envio do relatório por e-mail delegando ao WordPress (wp_mail)
-function observadados_send_report_handler($request) {
-    $params = $request->get_json_params();
-    if (empty($params['published_items'])) {
-        return new WP_Error('no_items', 'Nenhum item publicado fornecido.', array('status' => 400));
-    }
-    
-    $published_items = $params['published_items'];
-    $admin_email = get_option('admin_email');
-    if (empty($admin_email)) {
-        $admin_email = 'admin_wordpress@exemplo.com'; // fallback padrão
-    }
-    
-    // Construção de tabela HTML elegante
-    $rows_html = '';
-    foreach ($published_items as $item) {
-        $action_color = $item['action'] === 'Atualizado' ? '#3182ce' : '#319795';
-        $status_color = $item['status'] === 'draft' ? '#e53e3e' : '#2f855a';
-        $wp_url = home_url();
-        $admin_link = $wp_url . '/wp-admin/post.php?post=' . $item['wp_post_id'] . '&action=edit';
-        
-        $rows_html .= '
+function observadados_send_report_handler($request)
+{
+	$params = $request->get_json_params();
+	if (empty($params['published_items'])) {
+		return new WP_Error('no_items', 'Nenhum item publicado fornecido.', array('status' => 400));
+	}
+
+	$published_items = $params['published_items'];
+	$admin_email = get_option('admin_email');
+	if (empty($admin_email)) {
+		$admin_email = 'admin_wordpress@exemplo.com'; // fallback padrão
+	}
+
+	// Construção de tabela HTML elegante
+	$rows_html = '';
+	foreach ($published_items as $item) {
+		$action_color = $item['action'] === 'Atualizado' ? '#3182ce' : '#319795';
+		$status_color = $item['status'] === 'draft' ? '#e53e3e' : '#2f855a';
+		$wp_url = home_url();
+		$admin_link = $wp_url . '/wp-admin/post.php?post=' . $item['wp_post_id'] . '&action=edit';
+
+		$rows_html .= '
         <tr style="border-bottom: 1px solid #dddddd;">
             <td style="padding: 12px 15px; font-family: sans-serif;">' . esc_html($item['collector_key']) . '</td>
             <td style="padding: 12px 15px; font-family: sans-serif;">' . esc_html($item['uf']) . '</td>
@@ -1744,11 +1746,11 @@ function observadados_send_report_handler($request) {
             <td style="padding: 12px 15px; font-family: sans-serif; font-weight: bold; color: ' . $status_color . ';">' . esc_html(strtoupper($item['status'])) . '</td>
             <td style="padding: 12px 15px; font-family: sans-serif;"><a href="' . esc_url($admin_link) . '" style="color: #3182ce; text-decoration: none;">ID ' . esc_html($item['wp_post_id']) . '</a></td>
         </tr>';
-    }
+	}
 
-    $subject = '🔔 ObservaDados: Relatório de Publicação - ' . current_time('d/m/Y H:i');
-    
-    $html_content = '
+	$subject = '🔔 ObservaDados: Relatório de Publicação - ' . current_time('d/m/Y H:i');
+
+	$html_content = '
     <html>
     <body style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; background-color: #f7fafc; color: #2d3748; padding: 20px; margin: 0;">
         <div style="max-width: 800px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-top: 5px solid #3182ce;">
@@ -1788,18 +1790,18 @@ function observadados_send_report_handler($request) {
     </body>
     </html>';
 
-    // Cabeçalhos para enviar e-mail HTML com wp_mail()
-    $headers = array('Content-Type: text/html; charset=UTF-8');
-    
-    // Dispara o e-mail delegando ao WordPress, que por sua vez utiliza as configurações do WP Mail SMTP (Gmail OAuth)
-    $sent = wp_mail($admin_email, $subject, $html_content, $headers);
-    
-    if ($sent) {
-        return array(
-            'success' => true, 
-            'message' => 'Relatório enviado com sucesso via wp_mail() e WP Mail SMTP.'
-        );
-    } else {
-        return new WP_Error('send_failed', 'Falha ao enviar o e-mail via wp_mail().', array('status' => 500));
-    }
+	// Cabeçalhos para enviar e-mail HTML com wp_mail()
+	$headers = array('Content-Type: text/html; charset=UTF-8');
+
+	// Dispara o e-mail delegando ao WordPress, que por sua vez utiliza as configurações do WP Mail SMTP (Gmail OAuth)
+	$sent = wp_mail($admin_email, $subject, $html_content, $headers);
+
+	if ($sent) {
+		return array(
+			'success' => true,
+			'message' => 'Relatório enviado com sucesso via wp_mail() e WP Mail SMTP.'
+		);
+	} else {
+		return new WP_Error('send_failed', 'Falha ao enviar o e-mail via wp_mail().', array('status' => 500));
+	}
 }

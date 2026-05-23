@@ -701,6 +701,10 @@
   flex-direction: column;
   align-items: flex-start;
   border: 1px solid #EAEAEA;
+  transition: box-shadow 0.2s ease;
+}
+.indicadores-grid .indicador-card:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 .indicadores-grid .indicador-card .indicador-icon {
   font-size: 2rem;

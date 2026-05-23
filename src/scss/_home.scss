@@ -68,6 +68,11 @@
 		flex-direction: column;
 		align-items: flex-start;
 		border: 1px solid $light-gray;
+		transition: box-shadow 0.2s ease;
+
+		&:hover {
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+		}
 
 		.indicador-icon {
 			font-size: 2rem;

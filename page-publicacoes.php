@@ -79,17 +79,66 @@ get_header(); ?>
 									unset($args_sem_cat['categoria']);
 									$url_sem_cat = empty($args_sem_cat) ? $base_url : add_query_arg($args_sem_cat, $base_url);
 
+									// Get total number of active publications (status = publish)
+									$total_ativas = wp_count_posts('publicacao')->publish;
+
+									// Calculate publication counts for each category
+									$cat_counts = array();
+									$all_publications = get_posts(array(
+										'post_type' => 'publicacao',
+										'posts_per_page' => -1,
+										'post_status' => 'publish',
+									));
+
+									if ($all_publications) {
+										foreach ($all_publications as $pub) {
+											$meta_val = get_post_meta($pub->ID, 'categoria', true);
+											if (!empty($meta_val)) {
+												if (is_array($meta_val)) {
+													$cats = $meta_val;
+												} elseif (is_serialized($meta_val)) {
+													$cats = maybe_unserialize($meta_val);
+												} else {
+													$cats = array($meta_val);
+												}
+
+												if (is_array($cats)) {
+													foreach ($cats as $cat_id) {
+														$cat_id = intval($cat_id);
+														if ($cat_id > 0) {
+															if (!isset($cat_counts[$cat_id])) {
+																$cat_counts[$cat_id] = 0;
+															}
+															$cat_counts[$cat_id]++;
+														}
+													}
+												} else {
+													$cat_id = intval($cats);
+													if ($cat_id > 0) {
+														if (!isset($cat_counts[$cat_id])) {
+															$cat_counts[$cat_id] = 0;
+														}
+														$cat_counts[$cat_id]++;
+													}
+												}
+											}
+										}
+									}
+
 									$class_active = empty($cat_atual) ? 'active' : '';
-									echo '<a href="' . esc_url($url_sem_cat) . '" class="filter-badge ' . $class_active . '">Todas</a>';
+									echo '<a href="' . esc_url($url_sem_cat) . '" class="filter-badge ' . $class_active . '">Todas (' . intval($total_ativas) . ')</a>';
 
 									$categorias = get_posts(array('post_type' => 'categoria', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC'));
 									if ($categorias) {
 										foreach ($categorias as $cat) {
-											$class_active = ($cat_atual == $cat->post_name) ? 'active' : '';
-											$args_cat = $current_args;
-											$args_cat['categoria'] = $cat->post_name;
-											$url_cat = add_query_arg($args_cat, $base_url);
-											echo '<a href="' . esc_url($url_cat) . '" class="filter-badge ' . $class_active . '">' . esc_html($cat->post_title) . '</a>';
+											$count = isset($cat_counts[$cat->ID]) ? $cat_counts[$cat->ID] : 0;
+											if ($count > 0) {
+												$class_active = ($cat_atual == $cat->post_name) ? 'active' : '';
+												$args_cat = $current_args;
+												$args_cat['categoria'] = $cat->post_name;
+												$url_cat = add_query_arg($args_cat, $base_url);
+												echo '<a href="' . esc_url($url_cat) . '" class="filter-badge ' . $class_active . '">' . esc_html($cat->post_title) . ' (' . intval($count) . ')</a>';
+											}
 										}
 									}
 									?>
