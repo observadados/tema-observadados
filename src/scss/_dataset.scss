@@ -25,13 +25,30 @@
 	}
 }
 
+.dataset-excerpt {
+	margin-bottom: 1rem !important;
+}
+
+.entry-content-box+.dataset-metadata {
+	@media (min-width:$break-screen) {
+		min-width: 350px;
+		width: 350px;
+		margin: 0;
+
+		.dataset-metada-content {
+			columns: 1;
+		}
+	}
+}
+
 .dataset-metadata {
 	margin-top: 1rem;
 
 	@media (min-width:$break-screen) {
-		min-width: 250px;
-		width: 250px;
-		margin: 0;
+		.dataset-metada-content {
+			columns: 2;
+			column-gap: 2rem;
+		}
 	}
 
 	h4 {
@@ -53,76 +70,217 @@
 .dataset-visualization {
 	margin-top: 2rem;
 	width: 100%;
-	
+
 	h3 {
 		font-size: 1.25rem;
 		margin-bottom: 0;
 	}
 
 	.dataset-file-item {
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		align-items: flex-start;
 		border-radius: 8px;
 		padding: 1.5rem;
 		margin-bottom: 1rem;
 		background: #fff;
 		transition: all 0.2s ease;
 
-		@media (min-width: $break-screen) {
-			flex-direction: row;
+		.dataset-file-item-header {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
 			align-items: flex-start;
-		}
-
-		.file-info {
-			flex: 1;
-			margin-bottom: 1rem;
 
 			@media (min-width: $break-screen) {
-				margin-bottom: 0;
-				padding-right: 2rem;
+				flex-direction: row;
+				align-items: flex-start;
 			}
 
-			h5 {
-				font-size: 1.1rem;
-				font-weight: 600;
-				margin: 0 0 0.5rem 0;
+			.file-info {
+				flex: 1;
+				margin-bottom: 1rem;
+				min-width: 0;
+
+				@media (min-width: $break-screen) {
+					margin-bottom: 0;
+					padding-right: 2rem;
+				}
+
+				h5 {
+					font-size: 1.1rem;
+					font-weight: 600;
+					margin: 0 0 0.5rem 0;
+					color: $theme-primary;
+					word-break: break-all;
+
+					.file-size {
+						font-weight: 400;
+						font-size: 0.85em;
+						color: #666;
+					}
+				}
+
+				.file-desc {
+					font-size: 0.9rem;
+					color: #444;
+					margin-bottom: 0.5rem;
+					max-width: 100%;
+					overflow-x: auto;
+					overflow-y: hidden;
+					overflow-wrap: break-word;
+					word-wrap: break-word;
+				}
+
+				.file-meta {
+					font-size: 0.8rem;
+					color: #888;
+					margin: 0;
+
+					strong {
+						color: $theme-secondary;
+						border: 1px solid rgba($theme-secondary, 0.3);
+						padding: 0.1rem 0.5rem;
+						border-radius: 4px;
+						background: rgba($theme-secondary, 0.05);
+					}
+				}
+
+				.file-action {
+					@media (min-width:$break-screen) {
+						display: flex;
+						gap: .5rem;
+					}
+				}
+			}
+		}
+
+		.dataset-file-metadata {
+			border: 1px solid #e2e8f0;
+			border-radius: 8px;
+			padding: 1.25rem;
+			margin-top: 1.25rem;
+
+			h4 {
+				font-size: 1rem;
+				font-weight: 700;
 				color: $theme-primary;
-				word-break: break-all;
+				margin-top: 0;
+				margin-bottom: 1rem;
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
 
-				.file-size {
-					font-weight: 400;
-					font-size: 0.85em;
-					color: #666;
-				}
-			}
-
-			.file-desc {
-				font-size: 0.9rem;
-				color: #444;
-				margin-bottom: 0.5rem;
-			}
-
-			.file-meta {
-				font-size: 0.8rem;
-				color: #888;
-				margin: 0;
-
-				strong {
+				&::before {
+					content: "\f05a"; // FontAwesome info-circle
+					font-family: "Font Awesome 6 Free";
+					font-weight: 900;
 					color: $theme-secondary;
-					border: 1px solid rgba($theme-secondary, 0.3);
-					padding: 0.1rem 0.5rem;
-					border-radius: 4px;
-					background: rgba($theme-secondary, 0.05);
 				}
 			}
 
-			.file-action {
-				@media (min-width:$break-screen) {
+			ul {
+				list-style: none;
+				padding: 0;
+				margin: 0 0 1rem 0;
+				display: flex;
+				gap: 1rem;
+				flex-wrap: wrap;
+
+				li {
+					background: #ffffff;
+					border: 1px solid #e2e8f0;
+					border-radius: 6px;
+					padding: 0.5rem 1rem;
+					flex: 1;
+					min-width: 140px;
 					display: flex;
-					gap: .5rem;
+					flex-direction: column;
+					gap: 0.15rem;
+					font-size: 0.8rem;
+					color: #64748b;
+					box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+
+					strong {
+						font-size: 1.15rem;
+						color: $theme-primary;
+						font-weight: 800;
+						order: -1;
+					}
 				}
+			}
+
+			.btn-toggle-metadata {
+				margin-bottom: 0.5rem;
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4rem;
+				cursor: pointer;
+				
+				&.btn-primary {
+					background: $theme-primary;
+					color: #fff;
+					border-color: $theme-primary;
+				}
+			}
+
+			.metadata-collapse {
+				max-height: 0;
+				overflow: hidden;
+				transition: max-height 0.3s ease-out;
+
+				&.show {
+					max-height: 1200px;
+					transition: max-height 0.5s ease-in;
+				}
+			}
+
+			.metadata-table {
+				width: 100%;
+				border-collapse: separate;
+				border-spacing: 0;
+				margin-top: 0.75rem;
+				border: 1px solid #e2e8f0;
+				border-radius: 6px;
+				overflow: hidden;
+
+				th, td {
+					padding: 0.6rem 0.85rem;
+					font-size: 0.8rem;
+					text-align: left;
+					border-bottom: 1px solid #e2e8f0;
+				}
+
+				th {
+					background: lighten($light-gray, 5%);
+					color: $text-color;
+					font-weight: 700;
+					text-transform: uppercase;
+					letter-spacing: 0.05em;
+					font-size: 0.75rem;
+				}
+
+				tbody tr {
+					background: #ffffff;
+					transition: background-color 0.2s ease;
+
+					&:hover {
+						background: #f8fafc;
+					}
+				}
+
+				code {
+					background: #f1f5f9;
+					color: $text-color;
+					padding: 0.15rem 0.3rem;
+					border-radius: 4px;
+					font-family: monospace;
+					font-size: 0.8rem;
+				}
+			}
+
+			p {
+				font-size: 0.75rem;
+				color: $medium-gray;
+				margin-top: 0.25rem;
+				margin-bottom: 0;
 			}
 		}
 	}
@@ -310,10 +468,12 @@
 		display: flex;
 		flex-direction: column;
 		background: #fff;
-		border-radius: 8px;
+		border-radius: .5rem;
 		padding: 1.5rem;
 		border: 1px solid $light-gray;
 		transition: box-shadow 0.2s ease;
+		position: relative;
+		overflow: hidden;
 
 		@media (min-width: $break-screen) {
 			flex-direction: row;
@@ -323,6 +483,14 @@
 
 		&:hover {
 			box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+		}
+
+		.processed-data {
+			position: absolute;
+			right: 0;
+			bottom: 0;
+			margin: 0;
+			border-radius: .5rem 0 0 0;
 		}
 
 		.dataset-item-main {

@@ -30,7 +30,7 @@ $tamanho_formatado = get_query_var('dataset_tamanho_formatado', '');
 						$formato_nome = is_a($formato, 'WP_Term') ? $formato->name : '';
 						$is_previewable = strtolower($formato_nome) === 'csv' || strpos(strtolower($filename), '.csv') !== false || strtolower($formato_nome) === 'xlsx' || strpos(strtolower($filename), '.xlsx') !== false;
 
-						// TODO: Pré-visualização dos dados 
+						// TODO: Pré-visualização dos dados
 						// Removendo temporariamente pois a funcionalidade não está implementada
 						$is_previewable = false;
 
@@ -39,28 +39,38 @@ $tamanho_formatado = get_query_var('dataset_tamanho_formatado', '');
 						$download_url = home_url('?download_dataset=' . $dataset_id . '&file_index=' . $index);
 						?>
 						<div class="dataset-file-item">
-							<div class="file-info">
-								<h5>
-									<i class="fa-regular fa-file-lines"></i>
-									<a href="<?php echo esc_url($download_url); ?>"><?php echo esc_html($filename); ?></a>
-									<span class="file-size">(<?php echo $size; ?>)</span>
-								</h5>
-								<?php if ($desc): ?>
-									<p class="file-desc"><?php echo esc_html($desc); ?></p>
-								<?php endif; ?>
-								<p class="file-meta">
-									<?php if ($data): ?>Atualizado em <?php echo esc_html($data); ?> &bull; <?php endif; ?>
-									<?php if ($formato_nome): ?><strong><?php echo esc_html($formato_nome); ?></strong><?php endif; ?>
-								</p>
+							<div class="dataset-file-item-header">
+								<div class="file-info">
+									<h5>
+										<i class="fa-regular fa-file-lines"></i>
+										<a href="<?php echo esc_url($download_url); ?>"><?php echo esc_html($filename); ?></a>
+										<span class="file-size">(<?php echo $size; ?>)</span>
+									</h5>
+									<p class="file-meta">
+										<?php if ($data): ?>Atualizado em
+											<?php echo esc_html($data); ?> &bull;
+										<?php endif; ?>
+										<?php if ($formato_nome): ?><strong>
+												<?php echo esc_html($formato_nome); ?>
+											</strong>
+										<?php endif; ?>
+									</p>
+								</div>
+								<div class="file-action">
+									<?php if ($is_previewable): ?>
+										<button class="btn btn-outline btn-preview" data-url="<?php echo esc_url($url); ?>"><i
+												class="fa-solid fa-eye"></i> Visualizar</button>
+									<?php endif; ?>
+									<a href="<?php echo esc_url($download_url); ?>" class="btn"><i
+											class="fa-solid fa-download"></i>
+										Download</a>
+								</div>
 							</div>
-							<div class="file-action">
-								<?php if ($is_previewable): ?>
-									<button class="btn btn-outline btn-preview" data-url="<?php echo esc_url($url); ?>"><i
-											class="fa-solid fa-eye"></i> Visualizar</button>
-								<?php endif; ?>
-								<a href="<?php echo esc_url($download_url); ?>" class="btn"><i class="fa-solid fa-download"></i>
-									Download</a>
-							</div>
+							<?php if ($desc): ?>
+								<div class="file-desc">
+									<?php echo $desc; ?>
+								</div>
+							<?php endif; ?>
 						</div>
 					<?php endforeach; ?>
 				<?php else: ?>
@@ -78,11 +88,11 @@ $tamanho_formatado = get_query_var('dataset_tamanho_formatado', '');
 </li>
 <?php if (!empty($formatos_contagem)): ?>
 <li>
-	<ul class="dataset-summary-formats">
-		<?php foreach ($formatos_contagem as $nome => $qtd): ?>
-			<li><?php echo esc_html($nome); ?>: <?php echo esc_html($qtd); ?></li>
-		<?php endforeach; ?>
-	</ul>
+<ul class="dataset-summary-formats">
+<?php foreach ($formatos_contagem as $nome => $qtd): ?>
+<li><?php echo esc_html($nome); ?>: <?php echo esc_html($qtd); ?></li>
+<?php endforeach; ?>
+</ul>
 </li>
 <?php endif; ?>
 <li><i class="fa-solid fa-database"></i> <strong>Tamanho Total:</strong>
@@ -95,3 +105,49 @@ $tamanho_formatado = get_query_var('dataset_tamanho_formatado', '');
 */ ?>
 	</div>
 </div>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		document.querySelectorAll('.dataset-file-metadata').forEach(function (container) {
+			const table = container.querySelector('.metadata-table');
+			const note = container.querySelector('p');
+			if (!table) return;
+
+			// 1. Create collapsible container wrapper
+			const wrapper = document.createElement('div');
+			wrapper.className = 'metadata-collapse';
+
+			// 2. Move table and note paragraph inside the wrapper
+			table.parentNode.insertBefore(wrapper, table);
+			wrapper.appendChild(table);
+			if (note) {
+				wrapper.appendChild(note);
+			}
+
+			// 3. Create toggle button
+			const btn = document.createElement('button');
+			btn.className = 'btn btn-outline btn-sm mb-0 btn-toggle-metadata';
+			btn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Exibir metadados';
+			btn.type = 'button';
+
+			// 4. Insert toggle button immediately before the wrapper
+			wrapper.parentNode.insertBefore(btn, wrapper);
+
+			// 5. Add click event to toggle collapse with CSS transitions
+			btn.addEventListener('click', function () {
+				const isShown = wrapper.classList.contains('show');
+				if (isShown) {
+					wrapper.classList.remove('show');
+					btn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Exibir metadados';
+					btn.classList.remove('btn-primary');
+					btn.classList.add('btn-outline');
+				} else {
+					wrapper.classList.add('show');
+					btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> Esconder metadados';
+					btn.classList.remove('btn-outline');
+					btn.classList.add('btn-primary');
+				}
+			});
+		});
+	});
+</script>

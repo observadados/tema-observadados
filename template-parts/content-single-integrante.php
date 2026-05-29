@@ -39,8 +39,9 @@
 					$x = get_field('x');
 					$instagram = get_field('instagram');
 					$linkedin = get_field('linkedin');
+					$orcid = get_field('orcid');
 
-					if ($lattes || $github || $x || $instagram || $linkedin):
+					if ($lattes || $github || $x || $instagram || $linkedin || $orcid):
 						?>
 						<ul class="grid-item-social center">
 							<?php if ($lattes):
@@ -55,14 +56,16 @@
 										</div>
 									</a></li>
 							<?php endif; ?>
+							<?php if ($orcid): ?>
+								<li><a href="<?php echo esc_url($orcid); ?>" target="_blank" title="LinkedIn"><i
+											class="fab fa-orcid"></i></a></li>
+							<?php endif; ?>
 							<?php if ($github): ?>
-								<li><a href="<?php echo esc_url($github); ?>" target="_blank" title="GitHub"
-										style="color: #1B263B; font-size: 1.25rem; display: block; box-shadow: none;"><i
+								<li><a href="<?php echo esc_url($github); ?>" target="_blank" title="GitHub"><i
 											class="fab fa-github"></i></a></li>
 							<?php endif; ?>
 							<?php if ($x): ?>
-								<li><a href="<?php echo esc_url($x); ?>" target="_blank" title="X"
-										style="color: #1B263B; font-size: 1.25rem; display: block; box-shadow: none;">
+								<li><a href="<?php echo esc_url($x); ?>" target="_blank" title="X">
 										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
 											style="width: 1em; height: 1em; fill: currentColor;">
 											<path
@@ -71,13 +74,11 @@
 									</a></li>
 							<?php endif; ?>
 							<?php if ($instagram): ?>
-								<li><a href="<?php echo esc_url($instagram); ?>" target="_blank" title="Instagram"
-										style="color: #1B263B; font-size: 1.25rem; display: block; box-shadow: none;"><i
+								<li><a href="<?php echo esc_url($instagram); ?>" target="_blank" title="Instagram"><i
 											class="fab fa-instagram"></i></a></li>
 							<?php endif; ?>
 							<?php if ($linkedin): ?>
-								<li><a href="<?php echo esc_url($linkedin); ?>" target="_blank" title="LinkedIn"
-										style="color: #1B263B; font-size: 1.25rem; display: block; box-shadow: none;"><i
+								<li><a href="<?php echo esc_url($linkedin); ?>" target="_blank" title="LinkedIn"><i
 											class="fab fa-linkedin-in"></i></a></li>
 							<?php endif; ?>
 						</ul>

@@ -68,15 +68,13 @@ $tamanho_formatado = size_format($tamanho_total_bytes, 2);
 						<li>Formato: <?php echo implode(', ', $formatos_links); ?></li>
 						<li><i class="fa-regular fa-file-zipper"></i> Tamanho: <?php echo $tamanho_formatado ?></li>
 						<li><i class="fa-solid fa-download"></i>
-							<?php echo (get_field('downloads')) ? get_field('downloads') : 0 ?> downloads</li>
+							<?php echo observadados_get_dataset_downloads(get_the_ID()); ?> downloads</li>
 					</ul>
 
 					<?php // Resumo ?>
 					<?php if (get_the_excerpt()): ?>
 						<p class="dataset-excerpt"><?php echo get_the_excerpt(); ?></p>
 					<?php endif; ?>
-
-					<a href="<?php echo esc_url(home_url('?download_dataset=' . get_the_ID() . '&file_index=all')); ?>" class="btn btn-download"><i class="fa-solid fa-download"></i> Download</a>
 				</div>
 			</div>
 		</header>
@@ -85,55 +83,14 @@ $tamanho_formatado = size_format($tamanho_total_bytes, 2);
 
 			<div class="entry-content-boxed full-width">
 				<div class="page-row">
-				<div class="entry-content entry-content-box">
-						<?php if (get_the_content()): ?>
+					<?php if (get_the_content() && get_the_content() != get_the_excerpt()): ?>
+						<div class="entry-content entry-content-box">
 							<?php the_content(); ?>
-						<?php else: ?>
-								<p>Sem conteúdo.</p>
-						<?php endif; ?>
-					</div>
+						</div>
+					<?php endif; ?>
 					<aside class="dataset-metadata">
-					<h4>Origem</h4>
-						<?php if (get_field('instituicao') || get_field('origem')): ?>
-								<p><?php
-								if (get_field('instituicao')) {
-									$instituicoes = get_field('instituicao');
-									$nomes = array();
-
-									foreach ($instituicoes as $inst) {
-										// Pega o título e o link dependendo se for Post Object (CPT) ou Taxonomia
-										if (is_a($inst, 'WP_Post')) {
-											$titulo = get_the_title($inst->ID);
-											$link = get_field('link', $inst->ID);
-										} elseif (is_a($inst, 'WP_Term')) {
-											$titulo = $inst->name;
-											$link = get_field('link', 'term_' . $inst->term_id);
-										} else {
-											// Fallback (caso seja retornado apenas string ou ID)
-											$titulo = is_array($inst) ? (isset($inst['post_title']) ? $inst['post_title'] : $inst['name']) : (is_string($inst) ? $inst : '');
-											$link = '';
-										}
-
-										// Monta o HTML
-										if ($link) {
-											$nomes[] = '<a href="' . esc_url($link) . '" target="_blank" rel="noopener">' . esc_html($titulo) . '</a>';
-										} else {
-											$nomes[] = esc_html($titulo);
-										}
-									}
-
-									echo implode(', ', $nomes);
-								} else {
-									echo get_field('origem');
-								}
-								?>
-								</p>
-						<?php endif; ?>
-						<h4>Link original</h4>
-						<p><a href="<?php echo get_field('link') ?>"><?php echo get_field('link') ?></a>
-						</p>
-						<h4>Frequência de atualização</h4>
-						<p><?php echo get_field('frequencia') ?></p>
+						<a href="<?php echo esc_url(home_url('?download_dataset=' . get_the_ID() . '&file_index=all')); ?>"
+							class="btn btn-download mb-2"><i class="fa-solid fa-download"></i> Download</a>
 
 						<?php
 						// Tags
@@ -144,13 +101,75 @@ $tamanho_formatado = size_format($tamanho_total_bytes, 2);
 									<?php foreach ($tags as $tag):
 										$link_filtro = home_url('/conjuntos-de-dados/?tag=' . $tag->slug);
 										?>
-										<li><a href="<?php echo esc_url($link_filtro); ?>" class="category"><i
+											<li><a href="<?php echo esc_url($link_filtro); ?>" class="category"><i
 													class="fa-solid fa-tag"></i> <?php echo esc_html($tag->name); ?></a></li>
 									<?php endforeach; ?>
 								</ul>
 						<?php endif; ?>
-						<h4>Downloads</h4>
-						<p><?php echo (get_field('downloads')) ? get_field('downloads') : 0 ?></p>
+
+						<div class="dataset-metada-content">
+							<?php // Origem ?>
+							<h4>Origem</h4>
+							<?php if (get_field('instituicao') || get_field('origem')): ?>
+									<p><?php
+									if (get_field('instituicao')) {
+										$instituicoes = get_field('instituicao');
+										$nomes = array();
+
+										foreach ($instituicoes as $inst) {
+											// Pega o título e o link dependendo se for Post Object (CPT) ou Taxonomia
+											if (is_a($inst, 'WP_Post')) {
+												$titulo = get_the_title($inst->ID);
+												$link = get_field('link', $inst->ID);
+											} elseif (is_a($inst, 'WP_Term')) {
+												$titulo = $inst->name;
+												$link = get_field('link', 'term_' . $inst->term_id);
+											} else {
+												// Fallback (caso seja retornado apenas string ou ID)
+												$titulo = is_array($inst) ? (isset($inst['post_title']) ? $inst['post_title'] : $inst['name']) : (is_string($inst) ? $inst : '');
+												$link = '';
+											}
+
+											// Monta o HTML
+											if ($link) {
+												$nomes[] = '<a href="' . esc_url($link) . '" target="_blank" rel="noopener">' . esc_html($titulo) . '</a>';
+											} else {
+												$nomes[] = esc_html($titulo);
+											}
+										}
+
+										echo implode(', ', $nomes);
+									} else {
+										echo get_field('origem');
+									}
+									?>
+									</p>
+							<?php endif; ?>
+
+							<?php // Link original ?>
+							<h4>Link original</h4>
+						<p><a href="<?php echo get_field('link') ?>"><?php echo get_field('link') ?></a>
+						</p>
+
+							<?php // Frequência de atualização ?>
+							<h4>Frequência de atualização</h4>
+							<p><?php echo get_field('frequencia') ?></p>
+
+							<?php // Última varredura ?>
+							<?php if (get_field('data_ultima_varredura')): ?>
+									<h4>Última varredura</h4>
+									<p><?php echo get_field('data_ultima_varredura') ?></p>
+							<?php endif; ?>
+
+							<?php // Downloads ?>
+							<h4>Downloads</h4>
+							<p><?php echo observadados_get_dataset_downloads(get_the_ID()); ?></p>
+
+							<?php // Tratamento ?>
+							<h4>Tratamento</h4>
+							<p><?php echo (get_field('tratamento') == 'Dados tratados') ? '<span class="badge badge-lg text-bg-success">Dados tratados</span>' : '<span class="badge badge-lg text-bg-warning">Dados originais</span>' ?>
+							</p>
+						</div>
 					</aside>
 				</div>
 

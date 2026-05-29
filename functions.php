@@ -807,6 +807,9 @@ function dados_func($atts)
 			$content .= '    <a href="' . get_permalink() . '" class="btn btn-outline">Ver detalhes</a>';
 			$content .= '  </div>';
 
+			if (get_field('tratamento') == 'Dados tratados')
+				$content .= '<span class="badge badge-lg text-bg-success processed-data">Dados tratados</span>';
+
 			$content .= '</div>'; // .dataset-list-item
 		}
 		$content .= '</div>'; // .dataset-list
@@ -1253,6 +1256,26 @@ function observadados_handle_downloads()
 				$zip->close();
 
 				if ($has_files && file_exists($zip_path)) {
+					// Registrar download na tabela customizada
+					global $wpdb;
+					$table_name = $wpdb->prefix . 'observadados_downloads';
+					$user_id = get_current_user_id();
+					$ip_address = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field($_SERVER['REMOTE_ADDR']) : '';
+					$file_name = get_the_title($post_id) . ' - Pacote completo (ZIP)';
+
+					$wpdb->insert(
+						$table_name,
+						array(
+							'dataset_id' => $post_id,
+							'file_index' => 'all',
+							'file_name' => $file_name,
+							'user_id' => $user_id ? $user_id : null,
+							'ip_address' => $ip_address,
+							'downloaded_at' => current_time('mysql')
+						),
+						array('%d', '%s', '%s', '%d', '%s', '%s')
+					);
+
 					// Forçar download do arquivo ZIP
 					$post_slug = get_post_field('post_name', $post_id);
 					header('Content-Type: application/zip');
@@ -1288,6 +1311,32 @@ function observadados_handle_downloads()
 				$file_dl = (int) get_post_meta($post_id, $meta_key, true);
 				update_post_meta($post_id, $meta_key, $file_dl + 1);
 
+				// Incrementar também o contador geral do dataset (downloads)
+				$downloads = (int) get_post_meta($post_id, 'downloads', true);
+				update_post_meta($post_id, 'downloads', $downloads + 1);
+
+				// Registrar download na tabela customizada
+				global $wpdb;
+				$table_name = $wpdb->prefix . 'observadados_downloads';
+				$user_id = get_current_user_id();
+				$ip_address = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field($_SERVER['REMOTE_ADDR']) : '';
+
+				$row = $files[$index];
+				$file_name = isset($row['arquivo']['filename']) ? $row['arquivo']['filename'] : basename($row['arquivo']['url']);
+
+				$wpdb->insert(
+					$table_name,
+					array(
+						'dataset_id' => $post_id,
+						'file_index' => (string) $index,
+						'file_name' => $file_name,
+						'user_id' => $user_id ? $user_id : null,
+						'ip_address' => $ip_address,
+						'downloaded_at' => current_time('mysql')
+					),
+					array('%d', '%s', '%s', '%d', '%s', '%s')
+				);
+
 				$file_url = $files[$index]['arquivo']['url'];
 				if ($file_url) {
 					wp_redirect($file_url);
@@ -1299,6 +1348,97 @@ function observadados_handle_downloads()
 	}
 }
 add_action('template_redirect', 'observadados_handle_downloads');
+
+/**
+ * Cria a tabela customizada para registrar o histórico de downloads
+ */
+function observadados_create_downloads_table()
+{
+	global $wpdb;
+	$table_name = $wpdb->prefix . 'observadados_downloads';
+	$db_version = '1.1'; // Versão com novas colunas incluídas
+
+	if (get_option('observadados_db_version') !== $db_version) {
+		$charset_collate = $wpdb->get_charset_collate();
+		$sql = "CREATE TABLE $table_name (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			dataset_id bigint(20) unsigned NOT NULL,
+			file_index varchar(50) NOT NULL,
+			file_name varchar(255) NOT NULL,
+			user_id bigint(20) unsigned DEFAULT NULL,
+			ip_address varchar(100) DEFAULT NULL,
+			downloaded_at datetime NOT NULL,
+			PRIMARY KEY  (id),
+			KEY dataset_id (dataset_id),
+			KEY downloaded_at (downloaded_at)
+		) $charset_collate;";
+
+		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+		dbDelta($sql);
+
+		update_option('observadados_db_version', $db_version);
+	}
+}
+add_action('after_switch_theme', 'observadados_create_downloads_table');
+add_action('admin_init', 'observadados_create_downloads_table');
+
+/**
+ * Retorna o total de downloads de um dataset específico (novos logs + legados do postmeta)
+ */
+function observadados_get_dataset_downloads($post_id)
+{
+	global $wpdb;
+	$table_name = $wpdb->prefix . 'observadados_downloads';
+
+	// Conta da tabela customizada
+	$new_downloads = (int) $wpdb->get_var($wpdb->prepare(
+		"SELECT COUNT(*) FROM {$table_name} WHERE dataset_id = %d",
+		$post_id
+	));
+
+	// Downloads legados (salvos antes da migração)
+	$legacy_downloads = (int) get_post_meta($post_id, 'downloads_legacy', true);
+
+	// Se 'downloads_legacy' não existe, inicializa com o valor antigo de 'downloads'
+	if (!metadata_exists('post', $post_id, 'downloads_legacy')) {
+		$legacy_downloads = (int) get_post_meta($post_id, 'downloads', true);
+		update_post_meta($post_id, 'downloads_legacy', $legacy_downloads);
+	}
+
+	return $legacy_downloads + $new_downloads;
+}
+
+/**
+ * Retorna o total geral de downloads de todos os datasets (novos logs + legados)
+ */
+function observadados_get_total_downloads()
+{
+	global $wpdb;
+	$table_name = $wpdb->prefix . 'observadados_downloads';
+
+	// Contagem da tabela customizada
+	$new_total = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table_name}");
+
+	// Soma de legados inicializados (downloads_legacy)
+	$legacy_total = (int) $wpdb->get_var("
+		SELECT SUM(CAST(meta_value AS UNSIGNED)) 
+		FROM {$wpdb->postmeta} 
+		WHERE meta_key = 'downloads_legacy'
+	");
+
+	// Soma de legados não-inicializados (downloads) dos posts que ainda não possuem 'downloads_legacy'
+	$uninitialized_legacy = (int) $wpdb->get_var("
+		SELECT SUM(CAST(meta_value AS UNSIGNED)) 
+		FROM {$wpdb->postmeta} 
+		WHERE meta_key = 'downloads' 
+		AND post_id NOT IN (
+			SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = 'downloads_legacy'
+		)
+	");
+
+	return $new_total + $legacy_total + $uninitialized_legacy;
+}
+
 
 // [blog]
 function blog_func($atts)
@@ -1521,14 +1661,8 @@ function indicadores_shortcode()
 	$count_publicacao = wp_count_posts('publicacao');
 	$num_publicacao = $count_publicacao ? $count_publicacao->publish : 0;
 
-	// Calcula o total de downloads dos datasets
-	global $wpdb;
-	$total_downloads = (int) $wpdb->get_var("
-		SELECT SUM(meta_value) 
-		FROM {$wpdb->postmeta} 
-		JOIN {$wpdb->posts} ON post_id = ID 
-		WHERE post_type = 'dataset' AND post_status = 'publish' AND meta_key = 'downloads'
-	");
+	// Calcula o total de downloads dos datasets (soma de novos logs + legados)
+	$total_downloads = observadados_get_total_downloads();
 
 	if ($total_downloads >= 1000) {
 		$num_downloads = round($total_downloads / 1000, 1) . 'k';
@@ -1615,9 +1749,11 @@ function dados_destaque_shortcode()
 				}
 			}
 
-			$downloads = (int) get_field('downloads');
+			$downloads = observadados_get_dataset_downloads(get_the_ID());
 
 			$content .= '<li class="grid-item blog-post" style="display:flex; flex-direction:column;">';
+			if (get_field('tratamento') == 'Dados tratados')
+				$content .= '<span class="badge badge-lg text-bg-success processed-data">Dados tratados</span>';
 			$content .= '<div class="grid-item-photo"><a href="' . esc_url($link) . '">' . $foto . '</a></div>';
 			$content .= '<div class="grid-item-info" style="flex:1; display:flex; flex-direction:column;">';
 
